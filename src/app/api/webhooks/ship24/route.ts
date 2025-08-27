@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal server configuration error.' }, { status: 500 });
   }
 
+  // --- Security Check: Verify the signature ---
   const signature = request.headers.get('ship24-signature');
   const requestBody = await request.text();
   
@@ -19,29 +20,24 @@ export async function POST(request: Request) {
   hmac.update(requestBody);
   const expectedSignature = hmac.digest('hex');
 
-  // --- TEMPORARY DIAGNOSTIC STEP ---
-  // The Ship24 test button does not send a signature. We are temporarily
-  // disabling this check to allow the test message to pass through.
-  // Real messages from Ship24 will have a valid signature.
-  /*
+  // The security check is now ACTIVE.
   if (signature !== expectedSignature) {
+    // The Ship24 test button will fail this check, which is expected.
+    // Only real webhook events from Ship24 will pass.
     console.warn('Invalid Ship24 webhook signature received.');
     return NextResponse.json({ error: 'Invalid signature.' }, { status: 401 });
   }
-  */
-  // --- END OF TEMPORARY STEP ---
+  // --- End of Security Check ---
 
   try {
     const event = JSON.parse(requestBody);
     
-    // The test webhook has a different structure from the real one.
-    // We need to handle both possibilities.
-    const tracking = event.data ? event.data.tracking : event.trackings[0].tracker;
-    const shipment = event.data ? event.data.shipment : event.trackings[0].shipment;
-    const allEvents = event.data ? event.data.tracking.events : event.trackings[0].events;
-    const lastEvent = allEvents[allEvents.length - 1];
+    // Real webhooks have a different structure from the test webhook.
+    // This code is now built for the REAL events.
+    const tracking = event.data.tracking;
+    const lastEvent = tracking.events[tracking.events.length - 1];
 
-    console.log(`Processing webhook for tracker: ${tracking.trackingNumber}, Status: ${lastEvent.status}`);
+    console.log(`Processing VALID webhook for tracker: ${tracking.trackingNumber}, Status: ${lastEvent.status}`);
 
     // Find the corresponding shipment in our database
     const { data: ourShipment, error: findError } = await supabase
@@ -51,20 +47,11 @@ export async function POST(request: Request) {
       .single();
 
     if (findError || !ourShipment) {
-      console.warn(`Webhook received for a tracking number not in our DB: ${tracking.trackingNumber}. This is normal for test messages.`);
-      // We will send a notification anyway for the test, using test data.
-      const testMessage = `
-      ✅ <b>Webhook Test Successful!</b>
-      --------------------------------------
-      <b>Status:</b> ${lastEvent.status}
-      <b>Location:</b> ${lastEvent.location}
-      <i>This is a test message. No data was saved.</i>
-      `;
-      await sendTelegramMessage(testMessage);
-      return NextResponse.json({ status: 'ok', message: 'Test webhook received and processed.' });
+      console.error(`Webhook received for a tracking number not in our DB: ${tracking.trackingNumber}`);
+      // Still return 200 so Ship24 doesn't keep retrying
+      return NextResponse.json({ status: 'ok', message: 'Shipment not found in our DB.' });
     }
 
-    // This part will run for REAL webhook events
     if (!ourShipment.purchases || !Array.isArray(ourShipment.purchases) || ourShipment.purchases.length === 0) {
         throw new Error(`Could not find a linked purchase for shipment with tracking number ${tracking.trackingNumber}`);
     }
@@ -73,7 +60,7 @@ export async function POST(request: Request) {
     // Add the new event to our checkpoints table
     const { error: checkpointError } = await supabase.from('checkpoints').insert({
       shipment_id: ourShipment.id,
-      event_time: lastEvent.occurrenceDatetime, // Use correct field name
+      event_time: lastEvent.datetime,
       location: lastEvent.location,
       description: lastEvent.status,
     });
