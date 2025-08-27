@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { Purchase } from '../lib/types'; // Import our new central Purchase type
+import type { Purchase } from '../lib/types';
 
 // Export the type so other files can use it
 export type { Purchase };
 
 export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
-  // The state can still be 'any' for now, as the API response is complex
-  const [trackingInfo, setTrackingInfo] = useState<any>(null);
+  // We are being more specific than `any` now
+  const [trackingInfo, setTrackingInfo] = useState<object | string | null>(null);
 
   const handleTrack = async (trackingNumber: string, courier: string) => {
     setTrackingInfo(`Fetching data for ${trackingNumber}...`);
@@ -23,9 +23,14 @@ export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
       if (!response.ok) throw new Error(data.error || 'Failed to fetch tracking info.');
       console.log('Tracking data received:', data);
       setTrackingInfo(data);
-    } catch (error: any) {
-      console.error(error);
-      setTrackingInfo(`Error: ${error.message}`);
+    } catch (error) { // We now handle the error type safely
+      if (error instanceof Error) {
+        console.error(error);
+        setTrackingInfo(`Error: ${error.message}`);
+      } else {
+        console.error('An unknown error occurred:', error);
+        setTrackingInfo('An unknown error occurred.');
+      }
     }
   };
 
@@ -66,7 +71,9 @@ export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
       {trackingInfo && (
         <div className="mt-6 p-4 bg-gray-900 rounded">
             <h3 className="font-bold mb-2">Tracking Result:</h3>
-            <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(trackingInfo, null, 2)}</pre>
+            <pre className="text-xs whitespace-pre-wrap break-all">
+              {typeof trackingInfo === 'string' ? trackingInfo : JSON.stringify(trackingInfo, null, 2)}
+            </pre>
         </div>
       )}
     </div>
