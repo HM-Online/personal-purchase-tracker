@@ -1,13 +1,12 @@
-import type { Purchase } from './PurchaseList'; // We can reuse the Purchase type
+import type { Shipment, Checkpoint } from '../lib/types'; // Import our new types
 
 // The component will receive the 'shipments' array from the purchase object
-export default function ShipmentTimeline({ shipments }: { shipments: Purchase['shipments'] }) {
-  // Handle cases where there is no shipment data
+export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] }) {
   if (!shipments || shipments.length === 0) {
     return <div className="text-gray-400">No shipment information available for this purchase.</div>;
   }
 
-  const shipment = shipments[0]; // Assuming one shipment per purchase for now
+  const shipment = shipments[0];
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg">
@@ -17,9 +16,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Purchase['s
         <p><strong>Courier:</strong> {shipment.courier}</p>
       </div>
 
-      {/* This is the timeline part */}
       <div className="relative border-l-2 border-gray-600 ml-3">
-        {/* Supabase doesn't have checkpoints yet, so we'll add a placeholder */}
         {(!shipment.checkpoints || shipment.checkpoints.length === 0) ? (
             <div className="mb-8 ml-6">
                 <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-900 rounded-full -left-3 ring-8 ring-gray-900">
@@ -34,11 +31,10 @@ export default function ShipmentTimeline({ shipments }: { shipments: Purchase['s
                 </p>
             </div>
         ) : (
-            // This part will display real checkpoints once we have them
-            shipment.checkpoints.map((checkpoint: any, index: number) => (
+            // We now use the proper 'Checkpoint' type instead of 'any'
+            shipment.checkpoints.map((checkpoint: Checkpoint, index: number) => (
                 <div key={index} className="mb-8 ml-6">
                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-900 rounded-full -left-3 ring-8 ring-gray-900">
-                        {/* Icon can be changed based on status */}
                      </span>
                      <h3 className="font-semibold text-white">{checkpoint.description}</h3>
                      <p className="text-sm text-gray-400">{checkpoint.location}</p>

@@ -1,28 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link'; // 1. We import the Link component
+import Link from 'next/link';
+import type { Purchase } from '../lib/types'; // Import our new central Purchase type
 
-export type Purchase = {
-  id: string;
-  created_at: string;
-  store_name: string;
-  order_id: string;
-  order_date: string;
-  user_id: string;
-  shipments: {
-    tracking_number: string;
-    courier: string;
-  }[];
-};
+// Export the type so other files can use it
+export type { Purchase };
 
 export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
+  // The state can still be 'any' for now, as the API response is complex
   const [trackingInfo, setTrackingInfo] = useState<any>(null);
 
   const handleTrack = async (trackingNumber: string, courier: string) => {
     setTrackingInfo(`Fetching data for ${trackingNumber}...`);
-    // ... (rest of the function is the same, so I'm omitting it for clarity)
-    // You can just paste the whole code block.
     try {
       const response = await fetch('/api/track', {
         method: 'POST',
@@ -48,7 +38,6 @@ export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
       <h2 className="text-xl font-bold mb-4">Your Purchases</h2>
       <ul className="space-y-4">
         {purchases.map((purchase) => (
-          // 2. We wrap the list item content with the Link component
           <li key={purchase.id} className="bg-gray-800 rounded-lg shadow hover:bg-gray-700 transition-colors duration-200">
             <Link href={`/purchase/${purchase.id}`} className="block p-4">
               <div className="flex justify-between items-center">
@@ -60,7 +49,7 @@ export default function PurchaseList({ purchases }: { purchases: Purchase[] }) {
                 {purchase.shipments && purchase.shipments.length > 0 && (
                   <button 
                       onClick={(e) => { 
-                          e.preventDefault(); // Prevent link navigation when clicking the button
+                          e.preventDefault();
                           handleTrack(purchase.shipments[0].tracking_number, purchase.shipments[0].courier);
                       }}
                       className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm z-10"
