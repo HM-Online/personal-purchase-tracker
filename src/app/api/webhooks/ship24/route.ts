@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const signature = request.headers.get('ship24-signature');
   const requestBody = await request.text();
   
-  const hmac = crypto.createHmac('sha266', webhookSecret);
+  const hmac = crypto.createHmac('sha256', webhookSecret);
   hmac.update(requestBody);
   const expectedSignature = hmac.digest('hex');
 
