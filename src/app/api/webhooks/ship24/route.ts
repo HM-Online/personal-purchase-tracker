@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     if (updateError) throw new Error(`Failed to update shipment status: ${updateError.message}`);
 
     // Format and send a Telegram notification for the update
-    const purchaseInfo = ourShipPment.purchases;
+    const purchaseInfo = ourShipment.purchases;
     const message = `
     🚚 <b>Tracking Update!</b>
     --------------------------------------
