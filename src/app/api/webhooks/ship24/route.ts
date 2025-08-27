@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   // --- Security Check: Verify the signature ---
   const signature = request.headers.get('ship24-signature');
   const requestBody = await request.text(); // Read the raw body text
-
+  
   const hmac = crypto.createHmac('sha256', webhookSecret);
   hmac.update(requestBody);
   const expectedSignature = hmac.digest('hex');
@@ -29,7 +29,6 @@ export async function POST(request: Request) {
   try {
     const event = JSON.parse(requestBody); // Now we can safely parse the JSON
     const tracking = event.data.tracking;
-    const shipment = tracking.shipment;
     const lastEvent = tracking.events[tracking.events.length - 1]; // Get the newest event
 
     console.log(`Received webhook for tracker: ${tracking.trackingNumber}, Status: ${lastEvent.status}`);
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
 
     if (findError || !ourShipment) {
       console.error('Could not find matching shipment in DB:', findError);
-      // Still return 200 so Ship24 doesn't keep retrying
+      // Still return 200 so Ship24 doesn't keep retrying for a shipment we don't have
       return NextResponse.json({ status: 'ok', message: 'Shipment not found in our DB.' });
     }
 
@@ -64,9 +63,15 @@ export async function POST(request: Request) {
       .eq('id', ourShipment.id);
 
     if (updateError) throw new Error(`Failed to update shipment status: ${updateError.message}`);
-
-    // Format and send a Telegram notification for the update
+    
+    // Correctly access the single purchase object from the array
     const purchaseInfo = ourShipment.purchases;
+
+    if (!purchaseInfo) {
+        throw new Error('Could not find linked purchase for webhook update.');
+    }
+    
+    // Format and send a Telegram notification for the update
     const message = `
     🚚 <b>Tracking Update!</b>
     --------------------------------------
