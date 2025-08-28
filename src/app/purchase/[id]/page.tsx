@@ -2,10 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '../../../lib/supabaseClient';
-import type { Purchase } from '../../../lib/types'; // We now import from our central types file
+import { supabase } from '@/lib/supabaseClient'; // CORRECTED PATH
+import type { Purchase } from '@/lib/types'; // CORRECTED PATH
 import Link from 'next/link';
-import ShipmentTimeline from '../../../components/ShipmentTimeline';
+import ShipmentTimeline from '@/components/ShipmentTimeline'; // CORRECTED PATH
+
+// Helper function to call our notification API
+async function sendNotification(message: string) {
+  await fetch('/api/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  });
+}
 
 export default function PurchaseDetailPage() {
   const params = useParams();
@@ -17,8 +26,7 @@ export default function PurchaseDetailPage() {
   const [isCreatingRefund, setIsCreatingRefund] = useState(false);
 
   const fetchPurchaseDetails = async () => {
-    setLoading(true);
-    // We update the select() query to also fetch linked refunds
+    // This function is now wrapped in if(id) check below
     const { data, error } = await supabase
       .from('purchases')
       .select('*, shipments(*, checkpoints(*)), refunds(*)') 
@@ -40,7 +48,6 @@ export default function PurchaseDetailPage() {
     }
   }, [id]);
 
-  // This is the new function to handle starting a refund
   const handleStartRefund = async () => {
     if (!purchase) return;
     setIsCreatingRefund(true);
@@ -52,8 +59,15 @@ export default function PurchaseDetailPage() {
     if (error) {
       alert('Error starting refund: ' + error.message);
     } else {
+      const message = `
+      ⚠️ <b>Refund Requested!</b>
+      --------------------------------------
+      <b>Store:</b> ${purchase.store_name}
+      <b>Order ID:</b> ${purchase.order_id}
+      `;
+      await sendNotification(message);
+      
       alert('Refund process started successfully!');
-      // Refresh the page data to show the new refund status
       fetchPurchaseDetails();
     }
     setIsCreatingRefund(false);
@@ -69,7 +83,6 @@ export default function PurchaseDetailPage() {
     return <div className="text-center p-8 text-white">Purchase not found.</div>;
   }
 
-  // Check if a refund already exists for this purchase
   const existingRefund = purchase.refunds && purchase.refunds.length > 0 ? purchase.refunds[0] : null;
 
   return (
@@ -78,14 +91,13 @@ export default function PurchaseDetailPage() {
         <h1 className="text-3xl font-bold mb-4">
             Purchase Details: <span className="text-blue-400">{purchase.store_name}</span>
         </h1>
-
+      
         <div className="bg-gray-800 p-6 rounded-lg mb-6">
             <h2 className="text-xl font-bold mb-2">Order Information</h2>
             <p><strong>Order ID:</strong> {purchase.order_id}</p>
             <p><strong>Order Date:</strong> {new Date(purchase.order_date).toLocaleDateString()}</p>
         </div>
-
-        {/* This is the new Refund section */}
+        
         <div className="bg-gray-800 p-6 rounded-lg mb-6">
             <h2 className="text-xl font-bold mb-2">Return / Refund Status</h2>
             {existingRefund ? (

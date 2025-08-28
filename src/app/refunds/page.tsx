@@ -4,13 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
-// A helper function to call our notification API
+// Helper function to call our notification API
 async function sendNotification(message: string) {
   await fetch('/api/notify', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message }),
   });
 }
@@ -39,6 +37,9 @@ export default function RefundsPage() {
       console.error('Error fetching refunds:', error);
       setError('Could not load refund data.');
     } else {
+      // --- THIS IS THE DIAGNOSTIC LOG ---
+      console.log('Data received from Supabase for refunds page:', data);
+      // --- END OF DIAGNOSTIC LOG ---
       setRefunds(data as RefundWithPurchase[]);
     }
     setLoading(false);
@@ -59,7 +60,6 @@ export default function RefundsPage() {
     } else {
       const purchaseInfo = refund.purchases?.[0];
       if (purchaseInfo) {
-        // --- THIS IS THE FIX: 'let' has been changed to 'const' ---
         const statusEmoji = newStatus === 'approved' ? '✅' : '💶';
         const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
 
@@ -75,6 +75,7 @@ export default function RefundsPage() {
     }
   };
 
+  // ... (The rest of the code is the same)
   const requestedRefunds = refunds.filter((r) => r.status === 'requested');
   const approvedRefunds = refunds.filter((r) => r.status === 'approved');
   const paidRefunds = refunds.filter((r) => r.status === 'paid');
@@ -94,16 +95,16 @@ export default function RefundsPage() {
           &larr; Back to Main Dashboard
         </Link>
       </div>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
+        
         <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-yellow-400">Requested ({requestedRefunds.length})</h2>
           <div className="space-y-4">
             {requestedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
+                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
                 <button 
                   onClick={() => updateRefundStatus(refund, 'approved')}
                   className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-2 rounded"
@@ -120,8 +121,8 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {approvedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
+                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
                 <button 
                   onClick={() => updateRefundStatus(refund, 'paid')}
                   className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-2 rounded"
@@ -138,8 +139,8 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {paidRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
+                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
               </div>
             ))}
           </div>
