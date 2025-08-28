@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
-// Helper function to call our notification API
+// A helper function to call our notification API
 async function sendNotification(message: string) {
   await fetch('/api/notify', {
     method: 'POST',
@@ -17,10 +17,11 @@ type RefundWithPurchase = {
   id: string;
   status: 'requested' | 'approved' | 'paid' | 'denied';
   created_at: string;
+  // This is the shape of the data we now force Supabase to return
   purchases: {
     store_name: string;
     order_id: string;
-  }[] | null;
+  };
 };
 
 export default function RefundsPage() {
@@ -29,17 +30,16 @@ export default function RefundsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchRefunds = async () => {
+    // --- THE FIX IS HERE ---
+    // We are using '!inner' to force the join to happen.
     const { data, error } = await supabase
       .from('refunds')
-      .select('*, purchases(store_name, order_id)');
+      .select('*, purchases!inner(store_name, order_id)');
 
     if (error) {
       console.error('Error fetching refunds:', error);
       setError('Could not load refund data.');
     } else {
-      // --- THIS IS THE DIAGNOSTIC LOG ---
-      console.log('Data received from Supabase for refunds page:', data);
-      // --- END OF DIAGNOSTIC LOG ---
       setRefunds(data as RefundWithPurchase[]);
     }
     setLoading(false);
@@ -56,9 +56,9 @@ export default function RefundsPage() {
       .eq('id', refund.id);
 
     if (error) {
-      alert('Error updating status: ' + error.message);
+      alert('Error updating status: '.concat(error.message));
     } else {
-      const purchaseInfo = refund.purchases?.[0];
+      const purchaseInfo = refund.purchases;
       if (purchaseInfo) {
         const statusEmoji = newStatus === 'approved' ? '✅' : '💶';
         const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
@@ -75,7 +75,6 @@ export default function RefundsPage() {
     }
   };
 
-  // ... (The rest of the code is the same)
   const requestedRefunds = refunds.filter((r) => r.status === 'requested');
   const approvedRefunds = refunds.filter((r) => r.status === 'approved');
   const paidRefunds = refunds.filter((r) => r.status === 'paid');
@@ -103,8 +102,8 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {requestedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
+                <p className="font-bold">{refund.purchases?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
                 <button 
                   onClick={() => updateRefundStatus(refund, 'approved')}
                   className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-2 rounded"
@@ -121,8 +120,8 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {approvedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
+                <p className="font-bold">{refund.purchases?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
                 <button 
                   onClick={() => updateRefundStatus(refund, 'paid')}
                   className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-2 rounded"
@@ -139,8 +138,8 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {paidRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.[0]?.store_name || '...loading'}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id || '...'}</p>
+                <p className="font-bold">{refund.purchases?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
               </div>
             ))}
           </div>
