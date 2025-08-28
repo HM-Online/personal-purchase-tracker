@@ -9,10 +9,11 @@ type RefundWithPurchase = {
   id: string;
   status: 'requested' | 'approved' | 'paid' | 'denied';
   created_at: string;
-  purchases: { // Supabase returns linked tables as an object or array
+  // THE FIX IS HERE: We now expect an array of purchases.
+  purchases: {
     store_name: string;
     order_id: string;
-  } | null;
+  }[] | null;
 };
 
 export default function RefundsPage() {
@@ -20,27 +21,37 @@ export default function RefundsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchRefunds = async () => {
+    const { data, error } = await supabase
+      .from('refunds')
+      .select('*, purchases(store_name, order_id)');
+
+    if (error) {
+      console.error('Error fetching refunds:', error);
+      setError('Could not load refund data.');
+    } else {
+      setRefunds(data as RefundWithPurchase[]);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchRefunds = async () => {
-      setLoading(true);
-      // Fetch all refunds and the store_name/order_id from their linked purchase
-      const { data, error } = await supabase
-        .from('refunds')
-        .select('*, purchases(store_name, order_id)');
-
-      if (error) {
-        console.error('Error fetching refunds:', error);
-        setError('Could not load refund data.');
-      } else {
-        setRefunds(data);
-      }
-      setLoading(false);
-    };
-
     fetchRefunds();
   }, []);
 
-  // Filter the refunds into separate arrays for each column
+  const updateRefundStatus = async (id: string, newStatus: RefundWithPurchase['status']) => {
+    const { error } = await supabase
+      .from('refunds')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (error) {
+      alert('Error updating status: ' + error.message);
+    } else {
+      fetchRefunds();
+    }
+  };
+
   const requestedRefunds = refunds.filter((r) => r.status === 'requested');
   const approvedRefunds = refunds.filter((r) => r.status === 'approved');
   const paidRefunds = refunds.filter((r) => r.status === 'paid');
@@ -61,44 +72,55 @@ export default function RefundsPage() {
         </Link>
       </div>
       
-      {/* This is the main container for our Kanban board */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Column 1: Requested */}
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-yellow-400">Requested ({requestedRefunds.length})</h2>
           <div className="space-y-4">
             {requestedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
-                {/* Status update buttons will go here later */}
+                {/* THE FIX IS HERE: We access the first item [0] of the purchases array */}
+                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
+                <button 
+                  onClick={() => updateRefundStatus(refund.id, 'approved')}
+                  className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-2 rounded"
+                >
+                  Mark as Approved →
+                </button>
               </div>
             ))}
           </div>
         </div>
 
         {/* Column 2: Approved */}
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-blue-400">Approved ({approvedRefunds.length})</h2>
           <div className="space-y-4">
             {approvedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
+                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
+                <button 
+                  onClick={() => updateRefundStatus(refund.id, 'paid')}
+                  className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-2 rounded"
+                >
+                  Mark as Paid →
+                </button>
               </div>
             ))}
           </div>
         </div>
 
         {/* Column 3: Paid */}
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-green-400">Paid ({paidRefunds.length})</h2>
           <div className="space-y-4">
             {paidRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                <p className="font-bold">{refund.purchases?.store_name}</p>
-                <p className="text-sm text-gray-400">{refund.purchases?.order_id}</p>
+                <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
+                <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
               </div>
             ))}
           </div>
