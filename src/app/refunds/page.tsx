@@ -10,7 +10,7 @@ export default function RefundsPage() {
         </Link>
       </div>
       <p className="text-gray-400">
-        (Kanban board with columns for 'Requested', 'Approved', and 'Paid' will be built here...)
+        (Kanban board with columns for Requested, Approved, and Paid will be built here...)
       </p>
     </main>
   );
