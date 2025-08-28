@@ -12,11 +12,16 @@ import type { Session } from '@supabase/supabase-js';
 
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null);
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]); // This holds ALL purchases from DB
   const [isLoading, setIsLoading] = useState(true);
+  
+  // --- THIS IS NEW (Step 8.2) ---
+  // State variables to hold the current filter values
+  const [searchTerm, setSearchTerm] = useState('');
+  const [storeFilter, setStoreFilter] = useState('');
+  // --- END OF NEW PART ---
 
   const fetchPurchases = async () => {
-    // THE FIX IS HERE: We now select everything to match our 'Purchase' type
     const { data, error } = await supabase
       .from('purchases')
       .select('*, shipments(*), refunds(*)')
@@ -58,6 +63,23 @@ export default function HomePage() {
   
   const storeNames = [...new Set(purchases.map(p => p.store_name))].sort();
 
+  // --- THIS IS NEW (Step 8.3) ---
+  // The logic to filter the purchases based on the state variables
+  const filteredPurchases = purchases
+    .filter(purchase => {
+      // Store filter logic
+      return storeFilter ? purchase.store_name === storeFilter : true;
+    })
+    .filter(purchase => {
+      // Search term logic (case-insensitive)
+      const term = searchTerm.toLowerCase();
+      return (
+        purchase.store_name.toLowerCase().includes(term) ||
+        purchase.order_id.toLowerCase().includes(term)
+      );
+    });
+  // --- END OF NEW PART ---
+
   if (isLoading) {
       return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading...</div>
   }
@@ -89,6 +111,7 @@ export default function HomePage() {
             </div>
         </div>
         
+        {/* The filter UI is now connected to our state variables */}
         <div className="w-full max-w-lg mb-6 p-4 bg-gray-800 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -98,6 +121,8 @@ export default function HomePage() {
                 id="search"
                 placeholder="Search..."
                 className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 text-white"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div>
@@ -105,6 +130,8 @@ export default function HomePage() {
               <select
                 id="storeFilter"
                 className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 text-white"
+                value={storeFilter}
+                onChange={(e) => setStoreFilter(e.target.value)}
               >
                 <option value="">All Stores</option>
                 {storeNames.map(name => (
@@ -116,7 +143,8 @@ export default function HomePage() {
         </div>
         
         <PurchaseForm onSuccess={handleNewPurchase} />
-        <PurchaseList purchases={purchases} />
+        {/* We now pass the FILTERED list to the component */}
+        <PurchaseList purchases={filteredPurchases} />
       </main>
     );
   }

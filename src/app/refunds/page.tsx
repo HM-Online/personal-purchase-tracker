@@ -4,12 +4,21 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
-// Define the shape of our refund data, including the linked purchase info
+// A helper function to call our notification API
+async function sendNotification(message: string) {
+  await fetch('/api/notify', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
+  });
+}
+
 type RefundWithPurchase = {
   id: string;
   status: 'requested' | 'approved' | 'paid' | 'denied';
   created_at: string;
-  // THE FIX IS HERE: We now expect an array of purchases.
   purchases: {
     store_name: string;
     order_id: string;
@@ -39,15 +48,31 @@ export default function RefundsPage() {
     fetchRefunds();
   }, []);
 
-  const updateRefundStatus = async (id: string, newStatus: RefundWithPurchase['status']) => {
+  // --- THIS FUNCTION IS NOW UPGRADED ---
+  const updateRefundStatus = async (refund: RefundWithPurchase, newStatus: RefundWithPurchase['status']) => {
     const { error } = await supabase
       .from('refunds')
       .update({ status: newStatus })
-      .eq('id', id);
+      .eq('id', refund.id);
 
     if (error) {
       alert('Error updating status: ' + error.message);
     } else {
+      // --- NOTIFICATION LOGIC ADDED ---
+      const purchaseInfo = refund.purchases?.[0];
+      if (purchaseInfo) {
+        let statusEmoji = newStatus === 'approved' ? '✅' : '💶';
+        let statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+        const message = `
+        ${statusEmoji} <b>Refund ${statusText}!</b>
+        --------------------------------------
+        <b>Store:</b> ${purchaseInfo.store_name}
+        <b>Order ID:</b> ${purchaseInfo.order_id}
+        `;
+        sendNotification(message);
+      }
+      // Refresh the board
       fetchRefunds();
     }
   };
@@ -80,11 +105,10 @@ export default function RefundsPage() {
           <div className="space-y-4">
             {requestedRefunds.map((refund) => (
               <div key={refund.id} className="bg-gray-700 p-4 rounded-md shadow">
-                {/* THE FIX IS HERE: We access the first item [0] of the purchases array */}
                 <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
                 <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
                 <button 
-                  onClick={() => updateRefundStatus(refund.id, 'approved')}
+                  onClick={() => updateRefundStatus(refund, 'approved')}
                   className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-2 rounded"
                 >
                   Mark as Approved →
@@ -103,7 +127,7 @@ export default function RefundsPage() {
                 <p className="font-bold">{refund.purchases?.[0]?.store_name}</p>
                 <p className="text-sm text-gray-400">{refund.purchases?.[0]?.order_id}</p>
                 <button 
-                  onClick={() => updateRefundStatus(refund.id, 'paid')}
+                  onClick={() => updateRefundStatus(refund, 'paid')}
                   className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-2 rounded"
                 >
                   Mark as Paid →
@@ -113,7 +137,7 @@ export default function RefundsPage() {
           </div>
         </div>
 
-        {/* Column 3: Paid */}
+        {/* Column 3: Paid --- CODE IS NOW IDENTICAL TO THE OTHERS --- */}
         <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-green-400">Paid ({paidRefunds.length})</h2>
           <div className="space-y-4">
