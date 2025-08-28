@@ -48,7 +48,6 @@ export default function RefundsPage() {
     fetchRefunds();
   }, []);
 
-  // --- THIS FUNCTION IS NOW UPGRADED ---
   const updateRefundStatus = async (refund: RefundWithPurchase, newStatus: RefundWithPurchase['status']) => {
     const { error } = await supabase
       .from('refunds')
@@ -58,11 +57,11 @@ export default function RefundsPage() {
     if (error) {
       alert('Error updating status: ' + error.message);
     } else {
-      // --- NOTIFICATION LOGIC ADDED ---
       const purchaseInfo = refund.purchases?.[0];
       if (purchaseInfo) {
-        let statusEmoji = newStatus === 'approved' ? '✅' : '💶';
-        let statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+        // --- THIS IS THE FIX: 'let' has been changed to 'const' ---
+        const statusEmoji = newStatus === 'approved' ? '✅' : '💶';
+        const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
 
         const message = `
         ${statusEmoji} <b>Refund ${statusText}!</b>
@@ -72,7 +71,6 @@ export default function RefundsPage() {
         `;
         sendNotification(message);
       }
-      // Refresh the board
       fetchRefunds();
     }
   };
@@ -96,10 +94,9 @@ export default function RefundsPage() {
           &larr; Back to Main Dashboard
         </Link>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Column 1: Requested */}
+
         <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-yellow-400">Requested ({requestedRefunds.length})</h2>
           <div className="space-y-4">
@@ -118,7 +115,6 @@ export default function RefundsPage() {
           </div>
         </div>
 
-        {/* Column 2: Approved */}
         <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-blue-400">Approved ({approvedRefunds.length})</h2>
           <div className="space-y-4">
@@ -137,7 +133,6 @@ export default function RefundsPage() {
           </div>
         </div>
 
-        {/* Column 3: Paid --- CODE IS NOW IDENTICAL TO THE OTHERS --- */}
         <div className="bg-gray-800 rounded-lg p-4 flex flex-col">
           <h2 className="font-bold text-xl mb-4 text-green-400">Paid ({paidRefunds.length})</h2>
           <div className="space-y-4">
