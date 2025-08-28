@@ -1,58 +1,76 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'; // 1. Import the new hook
+import { useParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabaseClient';
-import type { Purchase } from '../../../components/PurchaseList';
+import type { Purchase } from '../../../lib/types'; // We now import from our central types file
 import Link from 'next/link';
 import ShipmentTimeline from '../../../components/ShipmentTimeline';
 
-// We no longer need the Page Props type, so it has been removed.
-
 export default function PurchaseDetailPage() {
-  // 2. Use the hook to get the params
   const params = useParams();
-  const id = params.id as string; // Get the id from the hook's result
+  const id = params.id as string;
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreatingRefund, setIsCreatingRefund] = useState(false);
+
+  const fetchPurchaseDetails = async () => {
+    setLoading(true);
+    // We update the select() query to also fetch linked refunds
+    const { data, error } = await supabase
+      .from('purchases')
+      .select('*, shipments(*, checkpoints(*)), refunds(*)') 
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching purchase details:', error);
+      setError('Failed to load purchase details.');
+    } else {
+      setPurchase(data);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchPurchaseDetails = async () => {
-      if (!id) return; // Don't fetch if the id isn't available yet
+    if (id) {
+        fetchPurchaseDetails();
+    }
+  }, [id]);
 
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('purchases')
-        .select('*, shipments(*, checkpoints(*))')
-        .eq('id', id) // 3. Use the id from the hook
-        .single();
+  // This is the new function to handle starting a refund
+  const handleStartRefund = async () => {
+    if (!purchase) return;
+    setIsCreatingRefund(true);
+    const { error } = await supabase.from('refunds').insert({
+      purchase_id: purchase.id,
+      status: 'requested',
+    });
 
-      if (error) {
-        console.error('Error fetching purchase details:', error);
-        setError('Failed to load purchase details.');
-      } else {
-        setPurchase(data);
-      }
-      setLoading(false);
-    };
+    if (error) {
+      alert('Error starting refund: ' + error.message);
+    } else {
+      alert('Refund process started successfully!');
+      // Refresh the page data to show the new refund status
+      fetchPurchaseDetails();
+    }
+    setIsCreatingRefund(false);
+  };
 
-    fetchPurchaseDetails();
-  }, [id]); // 4. The dependency is now the id from the hook
-
-  // The rest of the component (the JSX) is identical
   if (loading) {
     return <div className="text-center p-8 text-white">Loading purchase details...</div>;
   }
-
   if (error) {
     return <div className="text-center p-8 text-red-500">{error}</div>;
   }
-
   if (!purchase) {
     return <div className="text-center p-8 text-white">Purchase not found.</div>;
   }
+
+  // Check if a refund already exists for this purchase
+  const existingRefund = purchase.refunds && purchase.refunds.length > 0 ? purchase.refunds[0] : null;
 
   return (
     <main className="container mx-auto p-4 text-white">
@@ -67,8 +85,23 @@ export default function PurchaseDetailPage() {
             <p><strong>Order Date:</strong> {new Date(purchase.order_date).toLocaleDateString()}</p>
         </div>
 
-        <ShipmentTimeline shipments={purchase.shipments} />
+        {/* This is the new Refund section */}
+        <div className="bg-gray-800 p-6 rounded-lg mb-6">
+            <h2 className="text-xl font-bold mb-2">Return / Refund Status</h2>
+            {existingRefund ? (
+                <p className="font-bold text-lg capitalize">Status: <span className="text-yellow-400">{existingRefund.status}</span></p>
+            ) : (
+                <button 
+                    onClick={handleStartRefund}
+                    disabled={isCreatingRefund}
+                    className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500"
+                >
+                    {isCreatingRefund ? 'Starting...' : 'Start Refund Process'}
+                </button>
+            )}
+        </div>
 
+        <ShipmentTimeline shipments={purchase.shipments} />
     </main>
   );
 }

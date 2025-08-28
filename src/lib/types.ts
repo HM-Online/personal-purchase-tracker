@@ -15,6 +15,14 @@ export type Shipment = {
   checkpoints: Checkpoint[];
 };
 
+// This is the new type we are adding
+export type Refund = {
+    id: string;
+    purchase_id: string;
+    status: 'requested' | 'approved' | 'paid' | 'denied';
+    created_at: string;
+};
+
 export type Purchase = {
   id: string;
   created_at: string;
@@ -23,4 +31,5 @@ export type Purchase = {
   order_date: string;
   user_id: string;
   shipments: Shipment[];
+  refunds: Refund[]; // We've added this line
 };
