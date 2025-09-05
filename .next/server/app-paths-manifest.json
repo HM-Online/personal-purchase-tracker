@@ -1,0 +1,9 @@
+{
+  "/page": "app/page.js",
+  "/api/stats/route": "app/api/stats/route.js",
+  "/refunds/page": "app/refunds/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/claims/page": "app/claims/page.js",
+  "/api/notify/route": "app/api/notify/route.js",
+  "/purchase/[id]/page": "app/purchase/[id]/page.js"
+}
