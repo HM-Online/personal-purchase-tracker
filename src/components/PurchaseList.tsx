@@ -15,10 +15,10 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
 
   if (purchases.length === 0) {
     return (
-        <div className="text-center text-text-muted bg-surface-dark p-6 rounded-lg w-full shadow-lg">
-            <p>No purchases found.</p>
-            <p className="text-sm">Try clearing your filters or adding a new purchase!</p>
-        </div>
+      <div className="text-center text-text-muted bg-surface-dark p-6 rounded-lg w-full shadow-lg">
+        <p>No purchases found.</p>
+        <p className="text-sm">Try clearing your filters or adding a new purchase!</p>
+      </div>
     );
   }
 
@@ -28,37 +28,63 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
       <ul className="space-y-4">
         {purchases.map((purchase) => {
           const isExpanded = purchase.id === expandedId;
+          const detailsId = `purchase-details-${purchase.id}`;
+
           return (
-            <motion.li 
+            <motion.li
               key={purchase.id}
               layout
               className="bg-surface-dark rounded-lg shadow-md overflow-hidden"
             >
               <div className="p-4">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-3">
+                  {/* Left: primary info (readability polish) */}
                   <Link href={`/purchase/${purchase.id}`} className="flex-grow min-w-0">
-                    <p className="font-bold text-lg text-text-light truncate">{purchase.store_name}</p>
-                    <p className="text-sm text-text-muted truncate">Order ID: {purchase.order_id}</p>
-                    <p className="text-sm text-text-muted">Order Date: {new Date(purchase.order_date).toLocaleDateString()}</p>
+                    <div className="space-y-1">
+                      <p className="text-lg font-semibold text-white truncate">
+                        {purchase.store_name}
+                      </p>
+
+                      <p className="text-sm font-medium text-accent-primary truncate">
+                        {purchase.order_id}
+                      </p>
+
+                      <p className="text-xs text-text-muted leading-snug">
+                        Order Date: {new Date(purchase.order_date).toLocaleDateString()}
+                      </p>
+                    </div>
                   </Link>
-                  <div className="flex items-center space-x-2 flex-shrink-0 pl-2">
-                    <button 
+
+                  {/* Right: actions */}
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    {/* Expand/Collapse toggle with smooth CSS rotation */}
+                    <button
+                      type="button"
                       onClick={() => setExpandedId(isExpanded ? null : purchase.id)}
-                      className="p-1 text-text-muted hover:text-accent-primary"
+                      className="p-1 text-text-muted hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/40 rounded"
                       aria-label="Toggle details"
+                      aria-expanded={isExpanded}
+                      aria-controls={detailsId}
                     >
-                      <motion.svg 
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" 
-                        className="w-5 h-5 transition-transform"
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        transition={{ duration: 0.2 }}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2.5}
+                        stroke="currentColor"
+                        className={`w-5 h-5 transform transition-transform duration-200 ease-in-out ${
+                          isExpanded ? 'rotate-180' : 'rotate-0'
+                        }`}
                       >
+                        {/* Chevron-down */}
                         <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                      </motion.svg>
+                      </svg>
                     </button>
-                    <button 
+
+                    <button
+                      type="button"
                       onClick={() => onDelete(purchase.id)}
-                      className="p-1 text-text-muted hover:text-accent-danger font-bold text-xl leading-none"
+                      className="p-1 text-text-muted hover:text-accent-danger font-bold text-xl leading-none focus:outline-none focus:ring-2 focus:ring-accent-danger/40 rounded"
                       aria-label="Delete purchase"
                     >
                       &times;
@@ -66,22 +92,54 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
                   </div>
                 </div>
 
-                <AnimatePresence>
+                {/* Expanded details */}
+                <AnimatePresence initial={false}>
                   {isExpanded && (
                     <motion.div
+                      id={detailsId}
                       initial={{ height: 0, opacity: 0, marginTop: 0 }}
                       animate={{ height: 'auto', opacity: 1, marginTop: '1rem' }}
                       exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="border-t border-gray-600 pt-4"
                     >
                       <div className="text-sm space-y-2 text-text-muted">
-                        {purchase.amount && <p><strong>Amount:</strong> {purchase.amount.toFixed(2)}</p>}
-                        {purchase.payment_method && <p><strong>Payment:</strong> {purchase.payment_method}</p>}
-                        {purchase.email_used && <p><strong>Email:</strong> {purchase.email_used}</p>}
-                        {purchase.shipping_address && <p><strong>Address:</strong> {purchase.shipping_address}</p>}
-                        {purchase.phone_number && <p><strong>Phone:</strong> {purchase.phone_number}</p>}
-                        {purchase.notes && <p><strong>Notes:</strong> {purchase.notes}</p>}
+                        {purchase.amount !== null && purchase.amount !== undefined && (
+                          <p>
+                            <strong className="text-text-light">Amount:</strong>{' '}
+                            {purchase.amount.toFixed(2)}
+                          </p>
+                        )}
+                        {purchase.payment_method && (
+                          <p>
+                            <strong className="text-text-light">Payment:</strong>{' '}
+                            {purchase.payment_method}
+                          </p>
+                        )}
+                        {purchase.email_used && (
+                          <p className="truncate">
+                            <strong className="text-text-light">Email:</strong>{' '}
+                            {purchase.email_used}
+                          </p>
+                        )}
+                        {purchase.shipping_address && (
+                          <p className="truncate">
+                            <strong className="text-text-light">Address:</strong>{' '}
+                            {purchase.shipping_address}
+                          </p>
+                        )}
+                        {purchase.phone_number && (
+                          <p className="truncate">
+                            <strong className="text-text-light">Phone:</strong>{' '}
+                            {purchase.phone_number}
+                          </p>
+                        )}
+                        {purchase.notes && (
+                          <p className="whitespace-pre-line">
+                            <strong className="text-text-light">Notes:</strong>{' '}
+                            {purchase.notes}
+                          </p>
+                        )}
                       </div>
                     </motion.div>
                   )}
