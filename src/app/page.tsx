@@ -16,6 +16,9 @@ type DashboardStats = {
   refunds_in_progress_count: number;
 };
 
+// Allowable status filter keys mapped from KPI clicks
+type StatusFilter = '' | 'in_transit' | 'delivered' | 'refunds_in_progress';
+
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -23,6 +26,7 @@ export default function HomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [storeFilter, setStoreFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(''); // KPI-driven list filter
 
   const fetchPurchases = useCallback(async () => {
     const { data, error } = await supabase
@@ -85,13 +89,79 @@ export default function HomePage() {
     fetchPurchases();
     fetchStats();
   };
-  
+
+  // ---- Robust status helpers (UI-only filtering) ----
+  const getString = (v: unknown) => (v ?? '').toString().toLowerCase();
+
+  const isDelivered = (p: Purchase) => {
+    const shipments: any[] = Array.isArray((p as any)?.shipments) ? (p as any).shipments : [];
+    return shipments.some((s) => getString(s?.status) === 'delivered');
+  };
+
+  const isInTransit = (p: Purchase) => {
+    const shipments: any[] = Array.isArray((p as any)?.shipments) ? (p as any).shipments : [];
+    if (shipments.length === 0) return false;
+    // Consider "in transit" if ANY shipment is not delivered
+    return shipments.some((s) => getString(s?.status) !== 'delivered');
+  };
+
+  const isRefundInProgress = (p: Purchase) => {
+    const refunds: any[] = Array.isArray((p as any)?.refunds) ? (p as any).refunds : [];
+    if (refunds.length === 0) return false;
+
+    const INPROG = new Set([
+      'in progress', 'in-progress', 'progress',
+      'pending', 'processing', 'open', 'opened',
+      'under review', 'under-review', 'awaiting', 'waiting',
+      'requested', 'submitted'
+    ]);
+
+    const DONE = new Set([
+      'completed', 'complete', 'approved', 'resolved',
+      'refunded', 'paid', 'closed', 'denied', 'rejected', 'canceled', 'cancelled'
+    ]);
+
+    let anyInProgress = false;
+    let anyDone = false;
+
+    for (const r of refunds) {
+      const raw =
+        r?.status ??
+        r?.state ??
+        r?.refund_status ??
+        r?.current_status ??
+        r?.progress_status ??
+        '';
+      const s = getString(raw);
+      if (INPROG.has(s)) anyInProgress = true;
+      if (DONE.has(s)) anyDone = true;
+    }
+
+    // If any refund explicitly looks "in progress", treat as in progress.
+    if (anyInProgress) return true;
+
+    // If refunds exist but none are in "done" states, assume still in progress.
+    if (!anyDone) return true;
+
+    return false;
+  };
+
+  // Build store list
   const storeNames = [...new Set(purchases.map(p => p.store_name))].sort();
+
+  // Compose filters: store + search + (optional) statusFilter from KPI
   const filteredPurchases = purchases
     .filter(p => (storeFilter ? p.store_name === storeFilter : true))
     .filter(p => {
       const term = searchTerm.toLowerCase();
       return p.store_name.toLowerCase().includes(term) || p.order_id.toLowerCase().includes(term);
+    })
+    .filter(p => {
+      if (!statusFilter) return true;
+      if (statusFilter === 'delivered') return isDelivered(p);
+      if (statusFilter === 'in_transit') return isInTransit(p);
+      if (statusFilter === 'refunds_in_progress') return isRefundInProgress(p);
+      return true;
     });
 
   if (isLoading) {
@@ -113,28 +183,72 @@ export default function HomePage() {
     );
   } else {
     return (
-      <main className="w-full p-4 lg:p-8 flex flex-col items-center">
-        <div className="w-full max-w-6xl">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-text-light">Personal Purchase Tracker</h1>
+      <main className="w-full flex flex-col items-center bg-background-dark min-h-screen">
+        {/* Sticky top bar */}
+        <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background-dark/80 backdrop-blur supports-[backdrop-filter]:bg-background-dark/60">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8 py-3 flex items-center justify-between">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-light">
+              Personal Purchase Tracker
+            </h1>
             <div className="flex items-center space-x-4">
-              <Link href="/claims" className="text-accent-primary hover:text-text-light font-semibold">View Claims</Link>
-              <Link href="/refunds" className="text-accent-primary hover:text-text-light font-semibold">View Refunds</Link>
-              <button onClick={() => supabase.auth.signOut()} className="bg-accent-danger hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg">Sign Out</button>
+              <Link
+                href="/claims"
+                className="text-accent-primary hover:text-text-light font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-primary/60 rounded px-2 py-1"
+              >
+                View Claims
+              </Link>
+              <Link
+                href="/refunds"
+                className="text-accent-primary hover:text-text-light font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-primary/60 rounded px-2 py-1"
+              >
+                View Refunds
+              </Link>
+              <button
+                onClick={() => supabase.auth.signOut()}
+                className="bg-accent-danger hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-danger/80"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
-          
-          {/* KPI row — responsive polish only, no logic/options changed */}
+        </header>
+
+        {/* Page content */}
+        <div className="w-full max-w-6xl px-4 lg:px-8 py-6">
+          {/* KPI row — clickable with hover glow */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-            <KpiCard title="In Transit" value={stats?.in_transit_count} />
-            <KpiCard title="Delivered" value={stats?.delivered_count} />
-            <KpiCard title="Refunds in Progress" value={stats?.refunds_in_progress_count} />
+            <KpiCard
+              title="In Transit"
+              value={stats?.in_transit_count}
+              onClick={() =>
+                setStatusFilter((prev) => (prev === 'in_transit' ? '' : 'in_transit'))
+              }
+            />
+            <KpiCard
+              title="Delivered"
+              value={stats?.delivered_count}
+              onClick={() =>
+                setStatusFilter((prev) => (prev === 'delivered' ? '' : 'delivered'))
+              }
+            />
+            <KpiCard
+              title="Refunds in Progress"
+              value={stats?.refunds_in_progress_count}
+              onClick={() =>
+                setStatusFilter((prev) =>
+                  (prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')
+                )
+              }
+            />
           </div>
-          
+
+          {/* Filters */}
           <div className="mb-6 p-4 bg-surface-dark rounded-lg shadow-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="search" className="block text-sm font-medium text-text-muted">Search (Store, Order ID)</label>
+                <label htmlFor="search" className="block text-sm font-medium text-text-muted">
+                  Search (Store, Order ID)
+                </label>
                 <input
                   type="text"
                   id="search"
@@ -145,7 +259,9 @@ export default function HomePage() {
                 />
               </div>
               <div>
-                <label htmlFor="storeFilter" className="block text-sm font-medium text-text-muted">Filter by Store</label>
+                <label htmlFor="storeFilter" className="block text-sm font-medium text-text-muted">
+                  Filter by Store
+                </label>
                 <select
                   id="storeFilter"
                   value={storeFilter}
@@ -157,6 +273,16 @@ export default function HomePage() {
                 </select>
               </div>
             </div>
+
+            {statusFilter && (
+              <div className="mt-3 text-xs text-text-muted">
+                Showing: <span className="font-medium text-text-light">
+                  {statusFilter === 'in_transit' ? 'In Transit' :
+                   statusFilter === 'delivered' ? 'Delivered' :
+                   'Refunds in Progress'}
+                </span> — click the same KPI again to clear.
+              </div>
+            )}
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
