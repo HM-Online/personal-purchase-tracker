@@ -3,7 +3,7 @@ import React from "react";
 
 type Props = {
   title: string;
-  value: number | string;
+  value?: number | string; // allow undefined while stats are loading
 };
 
 export default function KpiCard({ title, value }: Props) {
