@@ -11,16 +11,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/refunds/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/refunds/page.js"
-    ],
-    "/claims/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/claims/page.js"
-    ],
     "/purchase/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
