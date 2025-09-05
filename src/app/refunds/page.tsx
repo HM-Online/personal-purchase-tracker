@@ -13,7 +13,6 @@ type RefundWithPurchaseDetails = Refund & {
   } | null;
 };
 
-
 async function sendNotification(message: string) {
   await fetch('/api/notify', {
     method: 'POST',
@@ -68,12 +67,12 @@ export default function RefundsPage() {
       .eq('id', editingRefund.id);
 
     if (error) {
-        alert('Error updating refund: ' + error.message);
+      alert('Error updating refund: ' + error.message);
     } else {
-        alert('Refund updated successfully!');
-        setIsModalOpen(false);
-        setEditingRefund(null);
-        fetchRefunds();
+      alert('Refund updated successfully!');
+      setIsModalOpen(false);
+      setEditingRefund(null);
+      fetchRefunds();
     }
   };
 
@@ -83,34 +82,36 @@ export default function RefundsPage() {
       approved_at?: Date | null;
       paid_at?: Date | null;
     } = { status: newStatus };
+
     if (newStatus === 'approved') updateData.approved_at = new Date();
     else if (newStatus === 'paid') updateData.paid_at = new Date();
+
     if (newStatus === 'requested') {
       updateData.approved_at = null;
       updateData.paid_at = null;
     } else if (newStatus === 'approved' && refund.status === 'paid') {
       updateData.paid_at = null;
     }
+
     const { error } = await supabase.from('refunds').update(updateData).eq('id', refund.id);
+
     if (error) {
       alert('Error updating status: '.concat(error.message));
     } else {
       const purchaseInfo = refund.purchases;
-      if (purchaseInfo) {
-        if (newStatus !== 'requested') {
-            let statusEmoji = '❔';
-            if (newStatus === 'approved') statusEmoji = '✅';
-            if (newStatus === 'paid') statusEmoji = '💶';
-            if (newStatus === 'denied') statusEmoji = '❌';
-            const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-            const message = `
-            ${statusEmoji} <b>Refund ${statusText}!</b>
-            --------------------------------------
-            <b>Store:</b> ${purchaseInfo.store_name}
-            <b>Order ID:</b> ${purchaseInfo.order_id}
-            `;
-            sendNotification(message);
-        }
+      if (purchaseInfo && newStatus !== 'requested') {
+        let statusEmoji = '❔';
+        if (newStatus === 'approved') statusEmoji = '✅';
+        if (newStatus === 'paid') statusEmoji = '💶';
+        if (newStatus === 'denied') statusEmoji = '❌';
+        const statusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+        const message = `
+${statusEmoji} <b>Refund ${statusText}!</b>
+--------------------------------------
+<b>Store:</b> ${purchaseInfo.store_name}
+<b>Order ID:</b> ${purchaseInfo.order_id}
+`;
+        sendNotification(message);
       }
       fetchRefunds();
     }
@@ -121,99 +122,183 @@ export default function RefundsPage() {
   const paidRefunds = refunds.filter((r) => r.status === 'paid');
   const deniedRefunds = refunds.filter((r) => r.status === 'denied');
 
-  if (loading) return <div className="text-center p-8 text-white">Loading refunds...</div>;
-
-  const RefundCard = ({ refund, children }: { refund: RefundWithPurchaseDetails, children?: React.ReactNode }) => (
-    <div key={refund.id} className="bg-surface-dark p-4 rounded-md shadow flex flex-col justify-between">
-      <div>
-        <p className="font-bold text-text-light">{refund.purchases?.store_name}</p>
-        <p className="text-sm text-text-muted">{refund.purchases?.order_id}</p>
-        {refund.amount && <p className="text-sm text-text-light mt-2">Amount: {refund.amount.toFixed(2)}</p>}
-        {refund.platform && <p className="text-sm text-text-light">Platform: {refund.platform}</p>}
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+        Loading refunds...
       </div>
-      <div className="text-xs text-text-muted mt-3 border-t border-gray-600 pt-2">
+    );
+  }
+
+  /** Polished card used in all columns (UI only) */
+  const RefundCard = ({
+    refund,
+    children,
+  }: {
+    refund: RefundWithPurchaseDetails;
+    children?: React.ReactNode;
+  }) => (
+    <div
+      key={refund.id}
+      className="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-4 hover:shadow-[0_0_10px] hover:shadow-cyan-500/10 transition"
+    >
+      <div>
+        <p className="font-semibold text-white leading-snug">
+          {refund.purchases?.store_name}
+        </p>
+        <p className="text-sm text-cyan-400 truncate">{refund.purchases?.order_id}</p>
+
+        <div className="mt-3 space-y-1 text-sm">
+          {typeof refund.amount === 'number' && (
+            <p className="text-neutral-200">
+              <span className="text-neutral-400">Amount:</span> {refund.amount.toFixed(2)}
+            </p>
+          )}
+          {refund.platform && (
+            <p className="text-neutral-200">
+              <span className="text-neutral-400">Platform:</span> {refund.platform}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="text-xs text-neutral-400 mt-3 border-t border-neutral-800 pt-2 space-y-0.5">
         <p>Requested: {new Date(refund.created_at).toLocaleDateString()}</p>
         {refund.approved_at && <p>Approved: {new Date(refund.approved_at).toLocaleDateString()}</p>}
         {refund.paid_at && <p>Paid: {new Date(refund.paid_at).toLocaleDateString()}</p>}
       </div>
-      <div className="flex items-center space-x-2 mt-3">
-        <button onClick={() => handleEditClick(refund)} className="text-xs bg-gray-600 hover:bg-gray-500 text-white font-bold py-1 px-2 rounded">
-            Edit
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={() => handleEditClick(refund)}
+          className="text-xs border border-neutral-700 hover:bg-neutral-800 text-white font-semibold py-1 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/30"
+        >
+          Edit
         </button>
-        <div className="flex-grow">{children}</div>
+        <div className="flex-1">{children}</div>
       </div>
     </div>
   );
 
   return (
     <>
-      <main className="container mx-auto p-4 text-white">
+      <main className="min-h-screen bg-neutral-950 px-4 lg:px-8 py-6 text-white">
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Refunds Dashboard</h1>
-          <Link href="/" className="text-accent-primary hover:text-text-light">
-            &larr; Back to Main Dashboard
+          <h1 className="text-2xl md:text-3xl font-bold">Refunds Dashboard</h1>
+          <Link
+            href="/"
+            className="text-cyan-400 hover:text-white transition hover:shadow-[0_0_8px] hover:shadow-cyan-500/60 rounded px-2 py-1"
+          >
+            ← Back to Main Dashboard
           </Link>
         </div>
-        
+
+        {/* Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="font-bold text-xl mb-4 text-yellow-400">Requested ({requestedRefunds.length})</h2>
+          {/* Requested */}
+          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+            <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
+              <span className="text-yellow-400">Requested</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+                {requestedRefunds.length}
+              </span>
+            </h2>
             <div className="space-y-4">
               {requestedRefunds.map((refund) => (
                 <RefundCard key={refund.id} refund={refund}>
-                  <div className="flex space-x-2 w-full">
-                    <button onClick={() => updateRefundStatus(refund, 'denied')} className="w-1/2 bg-accent-danger hover:opacity-90 text-white text-sm font-bold py-1 px-2 rounded">
+                  <div className="flex gap-2 w-full">
+                    <button
+                      onClick={() => updateRefundStatus(refund, 'denied')}
+                      className="w-1/2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/60"
+                    >
                       Reject
                     </button>
-                    <button onClick={() => updateRefundStatus(refund, 'approved')} className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-2 rounded">
+                    <button
+                      onClick={() => updateRefundStatus(refund, 'approved')}
+                      className="w-1/2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-blue-500/60"
+                    >
                       Approve →
                     </button>
                   </div>
                 </RefundCard>
               ))}
             </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="font-bold text-xl mb-4 text-blue-400">Approved ({approvedRefunds.length})</h2>
+          </section>
+
+          {/* Approved */}
+          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+            <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
+              <span className="text-blue-400">Approved</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+                {approvedRefunds.length}
+              </span>
+            </h2>
             <div className="space-y-4">
               {approvedRefunds.map((refund) => (
                 <RefundCard key={refund.id} refund={refund}>
-                  <div className="flex space-x-2 w-full">
-                      <button onClick={() => updateRefundStatus(refund, 'requested')} className="w-1/2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold py-1 px-2 rounded">
-                          ← Undo
-                      </button>
-                      <button onClick={() => updateRefundStatus(refund, 'paid')} className="w-1/2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-2 rounded">
-                          Paid →
-                      </button>
+                  <div className="flex gap-2 w-full">
+                    <button
+                      onClick={() => updateRefundStatus(refund, 'requested')}
+                      className="w-1/2 border border-neutral-700 hover:bg-neutral-800 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                    >
+                      ← Undo
+                    </button>
+                    <button
+                      onClick={() => updateRefundStatus(refund, 'paid')}
+                      className="w-1/2 bg-green-600 hover:bg-green-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-green-500/60"
+                    >
+                      Paid →
+                    </button>
                   </div>
                 </RefundCard>
               ))}
             </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="font-bold text-xl mb-4 text-green-400">Paid ({paidRefunds.length})</h2>
+          </section>
+
+          {/* Paid */}
+          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+            <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
+              <span className="text-green-400">Paid</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+                {paidRefunds.length}
+              </span>
+            </h2>
             <div className="space-y-4">
               {paidRefunds.map((refund) => (
                 <RefundCard key={refund.id} refund={refund}>
-                    <button onClick={() => updateRefundStatus(refund, 'approved')} className="w-full bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold py-1 px-2 rounded">
-                          ← Undo
-                    </button>
+                  <button
+                    onClick={() => updateRefundStatus(refund, 'approved')}
+                    className="w-full border border-neutral-700 hover:bg-neutral-800 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                  >
+                    ← Undo
+                  </button>
                 </RefundCard>
               ))}
             </div>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="font-bold text-xl mb-4 text-accent-danger">Denied ({deniedRefunds.length})</h2>
+          </section>
+
+          {/* Denied */}
+          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+            <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
+              <span className="text-red-500">Denied</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+                {deniedRefunds.length}
+              </span>
+            </h2>
             <div className="space-y-4">
               {deniedRefunds.map((refund) => (
                 <RefundCard key={refund.id} refund={refund}>
-                    <button onClick={() => updateRefundStatus(refund, 'requested')} className="w-full bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold py-1 px-2 rounded">
-                          ← Re-open
-                    </button>
+                  <button
+                    onClick={() => updateRefundStatus(refund, 'requested')}
+                    className="w-full border border-neutral-700 hover:bg-neutral-800 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                  >
+                    ← Re-open
+                  </button>
                 </RefundCard>
               ))}
             </div>
-          </div>
+          </section>
         </div>
       </main>
 
