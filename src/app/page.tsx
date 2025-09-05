@@ -16,7 +16,6 @@ type DashboardStats = {
   refunds_in_progress_count: number;
 };
 
-// Allowable status filter keys mapped from KPI clicks
 type StatusFilter = '' | 'in_transit' | 'delivered' | 'refunds_in_progress';
 
 export default function HomePage() {
@@ -137,19 +136,13 @@ export default function HomePage() {
       if (DONE.has(s)) anyDone = true;
     }
 
-    // If any refund explicitly looks "in progress", treat as in progress.
     if (anyInProgress) return true;
-
-    // If refunds exist but none are in "done" states, assume still in progress.
-    if (!anyDone) return true;
-
+    if (!anyDone) return true; // refunds exist but none done → assume in progress
     return false;
   };
 
-  // Build store list
   const storeNames = [...new Set(purchases.map(p => p.store_name))].sort();
 
-  // Compose filters: store + search + (optional) statusFilter from KPI
   const filteredPurchases = purchases
     .filter(p => (storeFilter ? p.store_name === storeFilter : true))
     .filter(p => {
@@ -165,14 +158,14 @@ export default function HomePage() {
     });
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background-dark flex items-center justify-center text-text-light">Loading...</div>
+    return <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">Loading...</div>
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
-        <div className="w-full max-w-md p-8 bg-surface-dark rounded-lg shadow-2xl">
-          <h1 className="text-2xl font-bold mb-6 text-center text-text-light">Purchase Tracker</h1>
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+        <div className="w-full max-w-md p-8 bg-neutral-900 border border-neutral-800 rounded-lg shadow-2xl">
+          <h1 className="text-2xl font-bold mb-6 text-center text-white">Purchase Tracker</h1>
           <Auth 
             supabaseClient={supabase} 
             appearance={{ theme: ThemeSupa }} 
@@ -183,29 +176,29 @@ export default function HomePage() {
     );
   } else {
     return (
-      <main className="w-full flex flex-col items-center bg-background-dark min-h-screen">
+      <main className="w-full flex flex-col items-center bg-neutral-950 min-h-screen">
         {/* Sticky top bar */}
-        <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background-dark/80 backdrop-blur supports-[backdrop-filter]:bg-background-dark/60">
+        <header className="sticky top-0 z-40 w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/60">
           <div className="mx-auto max-w-6xl px-4 lg:px-8 py-3 flex items-center justify-between">
-            <h1 className="text-2xl md:text-3xl font-bold text-text-light">
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
               Personal Purchase Tracker
             </h1>
             <div className="flex items-center space-x-4">
               <Link
                 href="/claims"
-                className="text-accent-primary hover:text-text-light font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-primary/60 rounded px-2 py-1"
+                className="text-cyan-400 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/60 rounded px-2 py-1"
               >
                 View Claims
               </Link>
               <Link
                 href="/refunds"
-                className="text-accent-primary hover:text-text-light font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-primary/60 rounded px-2 py-1"
+                className="text-cyan-400 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/60 rounded px-2 py-1"
               >
                 View Refunds
               </Link>
               <button
                 onClick={() => supabase.auth.signOut()}
-                className="bg-accent-danger hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-shadow hover:shadow-[0_0_8px] hover:shadow-accent-danger/80"
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/80"
               >
                 Sign Out
               </button>
@@ -215,11 +208,12 @@ export default function HomePage() {
 
         {/* Page content */}
         <div className="w-full max-w-6xl px-4 lg:px-8 py-6">
-          {/* KPI row — clickable with hover glow */}
+          {/* KPI row — clickable with active highlight */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
             <KpiCard
               title="In Transit"
               value={stats?.in_transit_count}
+              active={statusFilter === 'in_transit'}
               onClick={() =>
                 setStatusFilter((prev) => (prev === 'in_transit' ? '' : 'in_transit'))
               }
@@ -227,6 +221,7 @@ export default function HomePage() {
             <KpiCard
               title="Delivered"
               value={stats?.delivered_count}
+              active={statusFilter === 'delivered'}
               onClick={() =>
                 setStatusFilter((prev) => (prev === 'delivered' ? '' : 'delivered'))
               }
@@ -234,6 +229,7 @@ export default function HomePage() {
             <KpiCard
               title="Refunds in Progress"
               value={stats?.refunds_in_progress_count}
+              active={statusFilter === 'refunds_in_progress'}
               onClick={() =>
                 setStatusFilter((prev) =>
                   (prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')
@@ -241,12 +237,12 @@ export default function HomePage() {
               }
             />
           </div>
-
+          
           {/* Filters */}
-          <div className="mb-6 p-4 bg-surface-dark rounded-lg shadow-md">
+          <div className="mb-6 p-4 bg-neutral-900 rounded-lg shadow-md border border-neutral-800">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="search" className="block text-sm font-medium text-text-muted">
+                <label htmlFor="search" className="block text-sm font-medium text-neutral-400">
                   Search (Store, Order ID)
                 </label>
                 <input
@@ -255,18 +251,18 @@ export default function HomePage() {
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="mt-1 block w-full bg-background-dark border-gray-600 rounded-md p-2 text-text-light focus:ring-accent-primary focus:border-accent-primary"
+                  className="mt-1 block w-full bg-neutral-950 border border-neutral-800 rounded-md p-2 text-white placeholder-neutral-500 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
               <div>
-                <label htmlFor="storeFilter" className="block text-sm font-medium text-text-muted">
+                <label htmlFor="storeFilter" className="block text-sm font-medium text-neutral-400">
                   Filter by Store
                 </label>
                 <select
                   id="storeFilter"
                   value={storeFilter}
                   onChange={(e) => setStoreFilter(e.target.value)}
-                  className="mt-1 block w-full bg-background-dark border-gray-600 rounded-md p-2 text-text-light focus:ring-accent-primary focus:border-accent-primary"
+                  className="mt-1 block w-full bg-neutral-950 border border-neutral-800 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                 >
                   <option value="">All Stores</option>
                   {storeNames.map(name => (<option key={name} value={name}>{name}</option>))}
@@ -275,8 +271,8 @@ export default function HomePage() {
             </div>
 
             {statusFilter && (
-              <div className="mt-3 text-xs text-text-muted">
-                Showing: <span className="font-medium text-text-light">
+              <div className="mt-3 text-xs text-neutral-400">
+                Showing: <span className="font-medium text-white">
                   {statusFilter === 'in_transit' ? 'In Transit' :
                    statusFilter === 'delivered' ? 'Delivered' :
                    'Refunds in Progress'}
