@@ -2,6 +2,5 @@
   "/page": "app/page.js",
   "/api/stats/route": "app/api/stats/route.js",
   "/purchase/[id]/page": "app/purchase/[id]/page.js",
-  "/api/track/route": "app/api/track/route.js",
-  "/api/notify/route": "app/api/notify/route.js"
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }

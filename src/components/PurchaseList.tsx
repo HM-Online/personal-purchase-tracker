@@ -15,7 +15,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
 
   if (purchases.length === 0) {
     return (
-      <div className="text-center text-text-muted bg-surface-dark p-6 rounded-lg w-full shadow-lg">
+      <div className="text-center text-neutral-400 bg-neutral-900 p-6 rounded-lg w-full shadow-lg border border-neutral-800">
         <p>No purchases found.</p>
         <p className="text-sm">Try clearing your filters or adding a new purchase!</p>
       </div>
@@ -24,7 +24,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold mb-4 text-text-light">Your Purchases</h2>
+      <h2 className="text-xl font-bold mb-4 text-white">Your Purchases</h2>
       <ul className="space-y-4">
         {purchases.map((purchase) => {
           const isExpanded = purchase.id === expandedId;
@@ -34,7 +34,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
             <motion.li
               key={purchase.id}
               layout
-              className="bg-surface-dark rounded-lg shadow-md overflow-hidden"
+              className="bg-neutral-900 rounded-lg shadow-md overflow-hidden border border-neutral-800"
             >
               <div className="p-4">
                 <div className="flex justify-between items-start gap-3">
@@ -45,11 +45,11 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
                         {purchase.store_name}
                       </p>
 
-                      <p className="text-sm font-medium text-accent-primary truncate">
+                      <p className="text-sm font-medium text-cyan-400 truncate">
                         {purchase.order_id}
                       </p>
 
-                      <p className="text-xs text-text-muted leading-snug">
+                      <p className="text-xs text-neutral-400 leading-snug">
                         Order Date: {new Date(purchase.order_date).toLocaleDateString()}
                       </p>
                     </div>
@@ -61,7 +61,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
                     <button
                       type="button"
                       onClick={() => setExpandedId(isExpanded ? null : purchase.id)}
-                      className="p-1 text-text-muted hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/40 rounded"
+                      className="p-1 text-neutral-400 hover:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/40"
                       aria-label="Toggle details"
                       aria-expanded={isExpanded}
                       aria-controls={detailsId}
@@ -84,7 +84,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
                     <button
                       type="button"
                       onClick={() => onDelete(purchase.id)}
-                      className="p-1 text-text-muted hover:text-accent-danger font-bold text-xl leading-none focus:outline-none focus:ring-2 focus:ring-accent-danger/40 rounded"
+                      className="p-1 text-neutral-400 hover:text-red-500 font-bold text-xl leading-none focus:outline-none focus:ring-2 focus:ring-red-500/40 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/50"
                       aria-label="Delete purchase"
                     >
                       &times;
@@ -101,42 +101,42 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
                       animate={{ height: 'auto', opacity: 1, marginTop: '1rem' }}
                       exit={{ height: 0, opacity: 0, marginTop: 0 }}
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="border-t border-gray-600 pt-4"
+                      className="border-t border-neutral-800 pt-4"
                     >
-                      <div className="text-sm space-y-2 text-text-muted">
+                      <div className="text-sm space-y-2 text-neutral-300">
                         {purchase.amount !== null && purchase.amount !== undefined && (
                           <p>
-                            <strong className="text-text-light">Amount:</strong>{' '}
+                            <strong className="text-white">Amount:</strong>{' '}
                             {purchase.amount.toFixed(2)}
                           </p>
                         )}
                         {purchase.payment_method && (
                           <p>
-                            <strong className="text-text-light">Payment:</strong>{' '}
+                            <strong className="text-white">Payment:</strong>{' '}
                             {purchase.payment_method}
                           </p>
                         )}
                         {purchase.email_used && (
                           <p className="truncate">
-                            <strong className="text-text-light">Email:</strong>{' '}
+                            <strong className="text-white">Email:</strong>{' '}
                             {purchase.email_used}
                           </p>
                         )}
                         {purchase.shipping_address && (
                           <p className="truncate">
-                            <strong className="text-text-light">Address:</strong>{' '}
+                            <strong className="text-white">Address:</strong>{' '}
                             {purchase.shipping_address}
                           </p>
                         )}
                         {purchase.phone_number && (
                           <p className="truncate">
-                            <strong className="text-text-light">Phone:</strong>{' '}
+                            <strong className="text-white">Phone:</strong>{' '}
                             {purchase.phone_number}
                           </p>
                         )}
                         {purchase.notes && (
                           <p className="whitespace-pre-line">
-                            <strong className="text-text-light">Notes:</strong>{' '}
+                            <strong className="text-white">Notes:</strong>{' '}
                             {purchase.notes}
                           </p>
                         )}
