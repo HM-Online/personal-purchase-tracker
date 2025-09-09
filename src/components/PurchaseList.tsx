@@ -1,3 +1,4 @@
+// src/components/PurchaseList.tsx
 'use client';
 
 import { useState } from 'react';
@@ -10,12 +11,72 @@ type PurchaseListProps = {
   onDelete: (purchaseId: string) => void;
 };
 
+// --- Helpers to derive a primary status (same concept as detail page) ---
+function titleCase(s: string) {
+  return s.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+type Tone = 'success' | 'info' | 'warning' | 'danger' | 'neutral';
+
+function getStatusForPurchase(p: Purchase): { label: string; tone: Tone } {
+  const shipments: any[] = Array.isArray((p as any)?.shipments) ? (p as any).shipments : [];
+  const refunds: any[] = Array.isArray((p as any)?.refunds) ? (p as any).refunds : [];
+
+  // Refund-first: if a refund exists and isn't terminal, show "Refund in Progress"
+  if (refunds.length > 0) {
+    const r = (refunds[0]?.status || '').toLowerCase();
+    const terminalRefund = new Set(['paid', 'approved', 'denied', 'completed', 'refunded', 'closed']);
+    if (r && !terminalRefund.has(r)) {
+      return { label: 'Refund in Progress', tone: 'warning' };
+    }
+  }
+
+  // Shipment-based badge
+  if (shipments.length > 0) {
+    // Any delivered?
+    if (shipments.some((s) => (s?.status || '').toLowerCase() === 'delivered')) {
+      return { label: 'Delivered', tone: 'success' };
+    }
+    // Any exception/failed?
+    if (shipments.some((s) => ['exception', 'failed_attempt'].includes((s?.status || '').toLowerCase()))) {
+      return { label: 'Delivery Issue', tone: 'danger' };
+    }
+    // Any return in progress?
+    if (shipments.some((s) => (s?.status || '').toLowerCase().startsWith('return'))) {
+      return { label: 'Return in Progress', tone: 'warning' };
+    }
+    // Default for having a shipment
+    const first = shipments[0];
+    return { label: first?.status ? titleCase(first.status) : 'In Transit', tone: 'info' };
+  }
+
+  // No shipments
+  return { label: 'No Shipment', tone: 'neutral' };
+}
+
+function Badge({ label, tone }: { label: string; tone: Tone }) {
+  const map: Record<Tone, string> = {
+    success: 'bg-green-500/15 text-green-300 border-green-400/20',
+    info: 'bg-cyan-500/15 text-cyan-300 border-cyan-400/20',
+    warning: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
+    danger: 'bg-red-500/15 text-red-300 border-red-400/20',
+    neutral: 'bg-white/10 text-neutral-300 border-white/10',
+  };
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] border ${map[tone]}`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function PurchaseList({ purchases, onDelete }: PurchaseListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (purchases.length === 0) {
     return (
-      <div className="text-center text-neutral-400 bg-neutral-900 p-6 rounded-lg w-full shadow-lg border border-neutral-800">
+      <div className="text-center text-neutral-300/90 bg-white/5 border border-white/10 backdrop-blur-xl p-6 rounded-xl w-full shadow-md">
         <p>No purchases found.</p>
         <p className="text-sm">Try clearing your filters or adding a new purchase!</p>
       </div>
@@ -28,116 +89,115 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
       <ul className="space-y-4">
         {purchases.map((purchase) => {
           const isExpanded = purchase.id === expandedId;
-          const detailsId = `purchase-details-${purchase.id}`;
+          const badge = getStatusForPurchase(purchase);
 
           return (
             <motion.li
               key={purchase.id}
               layout
-              className="bg-neutral-900 rounded-lg shadow-md overflow-hidden border border-neutral-800"
+              className={[
+                "relative rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-md overflow-hidden",
+                "hover:shadow-[0_0_16px] hover:shadow-cyan-500/10 transition",
+              ].join(" ")}
             >
               <div className="p-4">
+                {/* Top row: left = basic info link, right = badge + actions */}
                 <div className="flex justify-between items-start gap-3">
-                  {/* Left: primary info (readability polish) */}
-                  <Link href={`/purchase/${purchase.id}`} className="flex-grow min-w-0">
-                    <div className="space-y-1">
-                      <p className="text-lg font-semibold text-white truncate">
-                        {purchase.store_name}
-                      </p>
-
-                      <p className="text-sm font-medium text-cyan-400 truncate">
-                        {purchase.order_id}
-                      </p>
-
-                      <p className="text-xs text-neutral-400 leading-snug">
-                        Order Date: {new Date(purchase.order_date).toLocaleDateString()}
-                      </p>
-                    </div>
+                  <Link href={`/purchase/${purchase.id}`} className="flex-grow min-w-0 group">
+                    <p className="font-semibold text-lg text-white truncate group-hover:text-cyan-200 transition">
+                      {purchase.store_name}
+                    </p>
+                    <p className="text-sm text-neutral-300/90 truncate">
+                      Order ID: {purchase.order_id}
+                    </p>
+                    <p className="text-sm text-neutral-300/90">
+                      Order Date: {new Date(purchase.order_date).toLocaleDateString()}
+                    </p>
                   </Link>
 
-                  {/* Right: actions */}
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    {/* Expand/Collapse toggle with smooth CSS rotation */}
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(isExpanded ? null : purchase.id)}
-                      className="p-1 text-neutral-400 hover:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/40"
-                      aria-label="Toggle details"
-                      aria-expanded={isExpanded}
-                      aria-controls={detailsId}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2.5}
-                        stroke="currentColor"
-                        className={`w-5 h-5 transform transition-transform duration-200 ease-in-out ${
-                          isExpanded ? 'rotate-180' : 'rotate-0'
-                        }`}
-                      >
-                        {/* Chevron-down */}
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                      </svg>
-                    </button>
+                  <div className="flex items-start gap-2 flex-shrink-0 pl-2">
+                    {/* Status badge */}
+                    <Badge label={badge.label} tone={badge.tone} />
 
-                    <button
-                      type="button"
-                      onClick={() => onDelete(purchase.id)}
-                      className="p-1 text-neutral-400 hover:text-red-500 font-bold text-xl leading-none focus:outline-none focus:ring-2 focus:ring-red-500/40 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/50"
-                      aria-label="Delete purchase"
-                    >
-                      &times;
-                    </button>
+                    {/* Chevron + delete */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setExpandedId(isExpanded ? null : purchase.id)}
+                        className="p-1 text-neutral-300/90 hover:text-cyan-300"
+                        aria-label="Toggle details"
+                        title={isExpanded ? 'Collapse' : 'Expand'}
+                      >
+                        <motion.svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2.5}
+                          className="w-5 h-5"
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ type: 'tween', duration: 0.25, ease: 'easeInOut' }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </motion.svg>
+                      </button>
+
+                      <button
+                        onClick={() => onDelete(purchase.id)}
+                        className="p-1 text-neutral-300/90 hover:text-red-400 font-bold text-xl leading-none"
+                        aria-label="Delete purchase"
+                        title="Delete"
+                      >
+                        &times;
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Expanded details */}
+                {/* Expandable details */}
                 <AnimatePresence initial={false}>
                   {isExpanded && (
                     <motion.div
-                      id={detailsId}
                       initial={{ height: 0, opacity: 0, marginTop: 0 }}
                       animate={{ height: 'auto', opacity: 1, marginTop: '1rem' }}
                       exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="border-t border-neutral-800 pt-4"
+                      transition={{ duration: 0.28, ease: 'easeInOut' }}
+                      className="border-t border-white/10 pt-4"
                     >
-                      <div className="text-sm space-y-2 text-neutral-300">
-                        {purchase.amount !== null && purchase.amount !== undefined && (
+                      <div className="text-sm space-y-2 text-neutral-300/90">
+                        {(purchase as any)?.amount != null && (
                           <p>
-                            <strong className="text-white">Amount:</strong>{' '}
-                            {purchase.amount.toFixed(2)}
+                            <strong className="text-neutral-200">Amount:</strong>{' '}
+                            {Number((purchase as any).amount).toFixed(2)}
                           </p>
                         )}
-                        {purchase.payment_method && (
+                        {(purchase as any)?.payment_method && (
                           <p>
-                            <strong className="text-white">Payment:</strong>{' '}
-                            {purchase.payment_method}
+                            <strong className="text-neutral-200">Payment:</strong>{' '}
+                            {(purchase as any).payment_method}
                           </p>
                         )}
-                        {purchase.email_used && (
-                          <p className="truncate">
-                            <strong className="text-white">Email:</strong>{' '}
-                            {purchase.email_used}
+                        {(purchase as any)?.email_used && (
+                          <p>
+                            <strong className="text-neutral-200">Email:</strong>{' '}
+                            {(purchase as any).email_used}
                           </p>
                         )}
-                        {purchase.shipping_address && (
-                          <p className="truncate">
-                            <strong className="text-white">Address:</strong>{' '}
-                            {purchase.shipping_address}
-                          </p>
-                        )}
-                        {purchase.phone_number && (
-                          <p className="truncate">
-                            <strong className="text-white">Phone:</strong>{' '}
-                            {purchase.phone_number}
-                          </p>
-                        )}
-                        {purchase.notes && (
+                        {(purchase as any)?.shipping_address && (
                           <p className="whitespace-pre-line">
-                            <strong className="text-white">Notes:</strong>{' '}
-                            {purchase.notes}
+                            <strong className="text-neutral-200">Address:</strong>{' '}
+                            {(purchase as any).shipping_address}
+                          </p>
+                        )}
+                        {(purchase as any)?.phone_number && (
+                          <p>
+                            <strong className="text-neutral-200">Phone:</strong>{' '}
+                            {(purchase as any).phone_number}
+                          </p>
+                        )}
+                        {(purchase as any)?.notes && (
+                          <p className="whitespace-pre-line">
+                            <strong className="text-neutral-200">Notes:</strong>{' '}
+                            {(purchase as any).notes}
                           </p>
                         )}
                       </div>
