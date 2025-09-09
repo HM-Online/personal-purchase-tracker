@@ -161,7 +161,7 @@ export default function HomePage() {
     );
   }
 
-  // ---- SVG icons (professional/inline, no new deps) ----
+  // ---- SVG icons (inline) ----
   const TruckIcon = (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 7h12v10H3z" />
@@ -189,7 +189,6 @@ export default function HomePage() {
     <main
       className={[
         "w-full min-h-screen flex flex-col items-center",
-        // gradient background (indigo → violet) with a subtle radial glow
         "bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f6AA,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]",
       ].join(" ")}
     >
@@ -212,6 +211,13 @@ export default function HomePage() {
             >
               View Refunds
             </Link>
+            {/* NEW: Settings */}
+            <Link
+              href="/settings"
+              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
+            >
+              Settings
+            </Link>
             <button
               onClick={() => supabase.auth.signOut()}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80"
@@ -224,7 +230,7 @@ export default function HomePage() {
 
       {/* Content container */}
       <div className="w-full max-w-6xl px-4 lg:px-8 py-8">
-        {/* KPI row — glass + icons + active highlight */}
+        {/* KPI row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
           <KpiCard
             title="In Transit"
@@ -298,7 +304,7 @@ export default function HomePage() {
           )}
         </div>
         
-        {/* Main split: Add Form (glass) + Purchases list (cards) */}
+        {/* Main split: Add Form + Purchases list */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
             <h2 className="text-xl font-semibold text-white mb-4">Add New Purchase</h2>
