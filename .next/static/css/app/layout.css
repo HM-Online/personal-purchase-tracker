@@ -925,6 +925,10 @@ video {
 .border-white\/10 {
   border-color: rgb(255 255 255 / 0.1);
 }
+.border-cyan-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(34 211 238 / var(--tw-border-opacity, 1));
+}
 .bg-accent-primary {
   --tw-bg-opacity: 1;
   background-color: rgb(56 178 172 / var(--tw-bg-opacity, 1));
@@ -1349,6 +1353,11 @@ video {
 body {
   color: #E2E8F0;
   background-color: #1A202C;
+}
+
+.hover\:border-cyan-400:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(34 211 238 / var(--tw-border-opacity, 1));
 }
 
 .hover\:bg-blue-500:hover {
