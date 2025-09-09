@@ -213,11 +213,26 @@ export default function HomePage() {
             </Link>
             {/* NEW: Settings */}
             <Link
-              href="/settings"
-              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
-            >
-              Settings
-            </Link>
+  href="/settings"
+  className="p-2 rounded-full text-cyan-300 hover:text-white transition hover:bg-white/10 hover:shadow-[0_0_10px] hover:shadow-cyan-500/50"
+  title="Settings"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    className="w-5 h-5"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.01c1.543-.89 3.313.88 2.423 2.423a1.724 1.724 0 001.01 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.01 2.573c.89 1.543-.88 3.313-2.423 2.423a1.724 1.724 0 00-2.573 1.01c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.01c-1.543.89-3.313-.88-2.423-2.423a1.724 1.724 0 00-1.01-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.01-2.573c-.89-1.543.88-3.313 2.423-2.423.996.574 2.247.125 2.573-1.01z"
+    />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+</Link>
             <button
               onClick={() => supabase.auth.signOut()}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80"
