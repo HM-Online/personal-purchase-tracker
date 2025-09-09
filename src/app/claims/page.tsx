@@ -72,10 +72,7 @@ export default function ClaimsPage() {
   };
 
   const updateClaimStatus = async (claim: ClaimWithPurchase, newStatus: Claim['status']) => {
-    const { error } = await supabase
-      .from('claims')
-      .update({ status: newStatus })
-      .eq('id', claim.id);
+    const { error } = await supabase.from('claims').update({ status: newStatus }).eq('id', claim.id);
 
     if (error) {
       alert('Error updating status: '.concat(error.message));
@@ -98,13 +95,13 @@ export default function ClaimsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+      <div className="min-h-screen flex items-center justify-center text-white bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f680,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
         Loading Claims...
       </div>
     );
   }
 
-  // Polished claim card (UI only)
+  // Glass claim card (UI only)
   const ClaimCard = ({
     claim,
     children,
@@ -112,12 +109,10 @@ export default function ClaimsPage() {
     claim: ClaimWithPurchase;
     children?: React.ReactNode;
   }) => (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-lg shadow-sm p-4 hover:shadow-[0_0_10px] hover:shadow-cyan-500/10 transition">
+    <div className="bg-white/5 border border-white/10 rounded-xl shadow-md p-4 backdrop-blur-xl hover:shadow-[0_0_12px] hover:shadow-cyan-500/15 transition">
       <div>
-        <p className="font-semibold text-white leading-snug">
-          {claim.purchases?.store_name}
-        </p>
-        <p className="text-sm text-cyan-400 truncate">{claim.purchases?.order_id}</p>
+        <p className="font-semibold text-white leading-snug">{claim.purchases?.store_name}</p>
+        <p className="text-sm text-cyan-300 truncate">{claim.purchases?.order_id}</p>
         {claim.rma_number && (
           <p className="text-sm text-neutral-200 mt-2">
             <span className="text-neutral-400">RMA:</span> {claim.rma_number}
@@ -125,14 +120,14 @@ export default function ClaimsPage() {
         )}
       </div>
 
-      <div className="text-xs text-neutral-400 mt-3 border-top border-neutral-800 pt-2">
+      <div className="text-xs text-neutral-300/80 mt-3 border-t border-white/10 pt-2">
         Initiated: {new Date(claim.created_at).toLocaleDateString()}
       </div>
 
       <div className="flex items-center gap-2 mt-3">
         <button
           onClick={() => handleEditClick(claim)}
-          className="text-xs border border-neutral-700 hover:bg-neutral-800 text-white font-semibold py-1 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/30"
+          className="text-xs border border-white/10 hover:bg-white/10 text-white font-semibold py-1 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/30"
         >
           Edit
         </button>
@@ -148,13 +143,13 @@ export default function ClaimsPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-neutral-950 px-4 lg:px-8 py-6 text-white">
+      <main className="min-h-screen text-white bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f6AA,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)] px-4 lg:px-8 py-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Warranty Claims Dashboard</h1>
           <Link
             href="/"
-            className="text-cyan-400 hover:text-white transition hover:shadow-[0_0_8px] hover:shadow-cyan-500/60 rounded px-2 py-1"
+            className="text-cyan-300 hover:text-white transition hover:shadow-[0_0_10px] hover:shadow-cyan-500/60 rounded px-2 py-1"
           >
             ← Back to Main Dashboard
           </Link>
@@ -163,10 +158,10 @@ export default function ClaimsPage() {
         {/* Columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {/* Initiated */}
-          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
             <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
-              <span className="text-orange-400">Initiated</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+              <span className="text-orange-300">Initiated</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-black/30 border border-white/10">
                 {initiatedClaims.length}
               </span>
             </h2>
@@ -185,10 +180,10 @@ export default function ClaimsPage() {
           </section>
 
           {/* Item Sent */}
-          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
             <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
-              <span className="text-blue-400">Item Sent</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+              <span className="text-blue-300">Item Sent</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-black/30 border border-white/10">
                 {itemSentClaims.length}
               </span>
             </h2>
@@ -198,7 +193,7 @@ export default function ClaimsPage() {
                   <div className="flex gap-2 w-full">
                     <button
                       onClick={() => updateClaimStatus(claim, 'initiated')}
-                      className="w-1/2 border border-neutral-700 hover:bg-neutral-800 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                      className="w-1/2 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
                     >
                       ← Undo
                     </button>
@@ -215,10 +210,10 @@ export default function ClaimsPage() {
           </section>
 
           {/* Resolved & Closed */}
-          <section className="bg-neutral-900/60 border border-neutral-800 rounded-lg p-4">
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
             <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
-              <span className="text-green-400">Resolved &amp; Closed</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+              <span className="text-green-300">Resolved &amp; Closed</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-black/30 border border-white/10">
                 {resolvedClaims.length}
               </span>
             </h2>
@@ -227,7 +222,7 @@ export default function ClaimsPage() {
                 <ClaimCard key={claim.id} claim={claim}>
                   <button
                     onClick={() => updateClaimStatus(claim, 'item_sent')}
-                    className="w-full border border-neutral-700 hover:bg-neutral-800 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                    className="w-full border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
                   >
                     ← Undo
                   </button>

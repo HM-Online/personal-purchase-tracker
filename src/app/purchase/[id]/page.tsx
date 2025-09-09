@@ -17,7 +17,7 @@ async function sendNotification(message: string) {
   });
 }
 
-/** Add Tracking (same logic, modern dark UI only) */
+/** Add Tracking (same logic, glass UI only) */
 const AddTrackingForm = ({
   purchaseId,
   onSave,
@@ -76,28 +76,28 @@ const AddTrackingForm = ({
         className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end"
       >
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium text-neutral-400 mb-1">
+          <label className="block text-xs font-medium text-neutral-300/90 mb-1">
             Tracking Number
           </label>
           <input
             type="text"
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
-            className="block w-full bg-neutral-950 border border-neutral-800 rounded-md p-2 text-white placeholder-neutral-500 focus:border-cyan-500 focus:ring-cyan-500"
+            className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400"
             placeholder="e.g., 1Z999AA10123456784"
             required
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium text-neutral-400 mb-1">
+          <label className="block text-xs font-medium text-neutral-300/90 mb-1">
             Courier
           </label>
           <input
             type="text"
             value={courier}
             onChange={(e) => setCourier(e.target.value)}
-            className="block w-full bg-neutral-950 border border-neutral-800 rounded-md p-2 text-white placeholder-neutral-500 focus:border-cyan-500 focus:ring-cyan-500"
+            className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400"
             placeholder="e.g., DHL / UPS / FedEx"
             required
           />
@@ -180,7 +180,7 @@ export default function PurchaseDetailPage() {
     } else {
       const message = `⚠️ <b>Refund Requested!</b>\n--------------------------------------\n<b>Store:</b> ${purchase.store_name}\n<b>Order ID:</b> ${purchase.order_id}\n<b>Amount:</b> ${formData.amount || 'N/A'}`;
       await sendNotification(message);
-      alert('Refund process started successfully!');
+      alert('Claim process started successfully!');
       setIsRefundModalOpen(false);
       fetchPurchaseDetails();
     }
@@ -207,19 +207,19 @@ export default function PurchaseDetailPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+      <div className="min-h-screen flex items-center justify-center text-white bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f680,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
         Loading purchase details...
       </div>
     );
   if (error)
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-red-500">
+      <div className="min-h-screen flex items-center justify-center text-red-400 bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f680,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
         {error}
       </div>
     );
   if (!purchase)
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-white">
+      <div className="min-h-screen flex items-center justify-center text-white bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f680,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
         Purchase not found.
       </div>
     );
@@ -228,42 +228,85 @@ export default function PurchaseDetailPage() {
   const existingClaim = purchase.claims && purchase.claims.length > 0 ? purchase.claims[0] : null;
   const mainShipment =
     purchase.shipments && purchase.shipments.length > 0 ? purchase.shipments[0] : null;
-  const shipmentStatuses = [
-    'pending',
-    'in_transit',
-    'out_for_delivery',
-    'delivered',
-    'failed_attempt',
-    'exception',
-    'return_in_progress',
-    'return_delivered',
-  ];
 
-  // helper to format currency safely
   const fmtAmount =
     typeof purchase.amount === 'number' ? purchase.amount.toFixed(2) : undefined;
 
+  // ---------- NEW: Status badge helpers (UI only) ----------
+  const titleCase = (s: string) =>
+    s.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
+  const getPrimaryStatus = () => {
+    // If refund exists and not terminal → "Refund in Progress"
+    const r = existingRefund?.status?.toLowerCase();
+    const terminalRefund = new Set(['paid', 'approved', 'denied', 'completed', 'refunded', 'closed']);
+    if (r && !terminalRefund.has(r)) {
+      return { label: 'Refund in Progress', tone: 'warning' as const };
+    }
+    // Else show shipment status if present
+    const s = mainShipment?.status ? titleCase(mainShipment.status) : null;
+    if (s) {
+      // Map status to tones
+      const tone =
+        mainShipment?.status === 'delivered'
+          ? ('success' as const)
+          : ['exception', 'failed_attempt'].includes(mainShipment?.status ?? '')
+          ? ('danger' as const)
+          : mainShipment?.status?.startsWith('return')
+          ? ('warning' as const)
+          : ('info' as const);
+      return { label: s, tone };
+    }
+    return { label: 'No Shipment', tone: 'neutral' as const };
+  };
+
+  const Badge = ({ label, tone }: { label: string; tone: 'success'|'info'|'warning'|'danger'|'neutral' }) => {
+    const map: Record<typeof tone, string> = {
+      success: 'bg-green-500/15 text-green-300 border-green-400/20',
+      info: 'bg-cyan-500/15 text-cyan-300 border-cyan-400/20',
+      warning: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
+      danger: 'bg-red-500/15 text-red-300 border-red-400/20',
+      neutral: 'bg-white/10 text-neutral-300 border-white/10',
+    } as any;
+    return (
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${map[tone]}`}>
+        {label}
+      </span>
+    );
+  };
+
+  const primaryStatus = getPrimaryStatus();
+
   return (
     <>
-      <main className="min-h-screen bg-neutral-950 px-4 lg:px-8 py-6">
-        <div className="max-w-5xl mx-auto space-y-6">
-          {/* Back */}
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-cyan-400 hover:text-white transition"
-          >
-            ← Back to Dashboard
-          </Link>
+      <main className="min-h-screen text-white bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f6AA,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
+        {/* Sticky header */}
+        <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-white/5 backdrop-blur-xl">
+          <div className="max-w-5xl mx-auto px-4 lg:px-8 py-3 flex items-center justify-between gap-3">
+            <Link
+              href="/"
+              className="text-cyan-300 hover:text-white transition hover:shadow-[0_0_10px] hover:shadow-cyan-500/60 rounded px-2 py-1 whitespace-nowrap"
+            >
+              ← Back to Dashboard
+            </Link>
 
-          {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Purchase Details:{' '}
-            <span className="text-cyan-400">{purchase.store_name}</span>
-          </h1>
+            <div className="min-w-0 flex-1 flex items-center gap-3 justify-center">
+              <h1 className="text-xl md:text-2xl font-bold truncate">
+                Purchase Details: <span className="text-cyan-300">{purchase.store_name}</span>
+              </h1>
+              {/* NEW: Primary status badge */}
+              <Badge label={primaryStatus.label} tone={primaryStatus.tone} />
+            </div>
 
-          {/* Order Info — now shows ALL fields when available */}
-          <section className="bg-neutral-900 border border-neutral-800 rounded-lg p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="w-[120px]" />
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 space-y-6">
+          {/* Order Info — glass card with full fields */}
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span className="text-cyan-400">📦</span> Order Information
             </h2>
 
@@ -320,16 +363,14 @@ export default function PurchaseDetailPage() {
           </section>
 
           {/* Refund */}
-          <section className="bg-neutral-900 border border-neutral-800 rounded-lg p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <span className="text-orange-400">↩️</span> Return / Refund Status
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <span className="text-orange-300">↩️</span> Return / Refund Status
             </h2>
             {existingRefund ? (
               <p className="font-semibold text-base">
                 Status:{' '}
-                <span className="capitalize text-yellow-400">
-                  {existingRefund.status}
-                </span>
+                <span className="capitalize text-yellow-300">{existingRefund.status}</span>
               </p>
             ) : (
               <button
@@ -343,14 +384,14 @@ export default function PurchaseDetailPage() {
           </section>
 
           {/* Warranty */}
-          <section className="bg-neutral-900 border border-neutral-800 rounded-lg p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <span className="text-purple-400">🛡️</span> Warranty Claim Status
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <span className="text-purple-300">🛡️</span> Warranty Claim Status
             </h2>
             {existingClaim ? (
               <p className="font-semibold text-base">
                 Status:{' '}
-                <span className="capitalize text-purple-300">
+                <span className="capitalize text-purple-200">
                   {existingClaim.status.replace(/_/g, ' ')}
                 </span>
               </p>
@@ -366,10 +407,10 @@ export default function PurchaseDetailPage() {
           </section>
 
           {/* Shipment */}
-          <section className="bg-neutral-900 border border-neutral-800 rounded-lg p-5 shadow-sm">
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
             <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <span className="text-cyan-400">🚚</span> Shipment Timeline
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <span className="text-cyan-300">🚚</span> Shipment Timeline
               </h2>
 
               {mainShipment && (
@@ -378,7 +419,7 @@ export default function PurchaseDetailPage() {
                   onChange={(e) =>
                     handleStatusChange(mainShipment.id, e.target.value as Shipment['status'])
                   }
-                  className="bg-neutral-950 border border-neutral-800 rounded-md p-2 text-white text-sm focus:border-cyan-500 focus:ring-cyan-500"
+                  className="bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm focus:border-cyan-400 focus:ring-cyan-400"
                 >
                   {[
                     'pending',
