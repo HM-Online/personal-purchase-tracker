@@ -2,8 +2,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 import PurchaseForm from '@/components/PurchaseForm';
 import PurchaseList from '@/components/PurchaseList';
 import KpiCard from '@/components/KpiCard';
@@ -150,15 +148,9 @@ export default function HomePage() {
     );
   }
 
+  // ---------- CUSTOM AUTH (Invite-based registration) ----------
   if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f640,transparent_60%),linear-gradient(180deg,#0b1020, #0a0f1a)]">
-        <div className="w-full max-w-md p-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
-          <h1 className="text-2xl font-bold mb-6 text-center text-white">Purchase Tracker</h1>
-          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} theme="dark" />
-        </div>
-      </div>
-    );
+    return <AuthPanel />;
   }
 
   // ---- SVG icons (inline) ----
@@ -211,28 +203,18 @@ export default function HomePage() {
             >
               View Refunds
             </Link>
-            {/* NEW: Settings */}
             <Link
-  href="/settings"
-  className="p-2 rounded-full text-cyan-300 hover:text-white transition hover:bg-white/10 hover:shadow-[0_0_10px] hover:shadow-cyan-500/50"
-  title="Settings"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    className="w-5 h-5"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.01c1.543-.89 3.313.88 2.423 2.423a1.724 1.724 0 001.01 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.01 2.573c.89 1.543-.88 3.313-2.423 2.423a1.724 1.724 0 00-2.573 1.01c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.01c-1.543.89-3.313-.88-2.423-2.423a1.724 1.724 0 00-1.01-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.01-2.573c-.89-1.543.88-3.313 2.423-2.423.996.574 2.247.125 2.573-1.01z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-</Link>
+              href="/settings"
+              className="p-2 rounded-full text-cyan-300 hover:text-white transition hover:bg-white/10 hover:shadow-[0_0_10px] hover:shadow-cyan-500/50"
+              title="Settings"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.01c1.543-.89 3.313.88 2.423 2.423a1.724 1.724 0 001.01 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.01 2.573c.89 1.543-.88 3.313-2.423 2.423a1.724 1.724 0 00-2.573 1.01c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.01c-1.543.89-3.313-.88-2.423-2.423a1.724 1.724 0 00-1.01-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.01-2.573c-.89-1.543.88-3.313 2.423-2.423.996.574 2.247.125 2.573-1.01z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </Link>
             <button
               onClick={() => supabase.auth.signOut()}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80"
@@ -252,25 +234,36 @@ export default function HomePage() {
             value={stats?.in_transit_count}
             active={statusFilter === 'in_transit'}
             onClick={() => setStatusFilter((prev) => (prev === 'in_transit' ? '' : 'in_transit'))}
-            icon={TruckIcon}
+            icon={/* truck */(
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 7h12v10H3z" /><path d="M15 10h4l2 3v4h-6z" />
+                <circle cx="7.5" cy="18" r="1.5" /><circle cx="17.5" cy="18" r="1.5" />
+              </svg>
+            )}
           />
           <KpiCard
             title="Delivered"
             value={stats?.delivered_count}
             active={statusFilter === 'delivered'}
             onClick={() => setStatusFilter((prev) => (prev === 'delivered' ? '' : 'delivered'))}
-            icon={BoxIcon}
+            icon={/* box */(
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 7l9 4 9-4" /><path d="M21 7v10l-9 4-9-4V7" /><path d="M12 11v10" />
+              </svg>
+            )}
           />
           <KpiCard
             title="Refunds in Progress"
             value={stats?.refunds_in_progress_count}
             active={statusFilter === 'refunds_in_progress'}
             onClick={() =>
-              setStatusFilter((prev) =>
-                prev === 'refunds_in_progress' ? '' : 'refunds_in_progress'
-              )
+              setStatusFilter((prev) => (prev === 'refunds_in_progress' ? '' : 'refunds_in_progress'))
             }
-            icon={RefundIcon}
+            icon={/* refund */(
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v8h8" /><path d="M12 6v6" />
+              </svg>
+            )}
           />
         </div>
 
@@ -332,5 +325,111 @@ export default function HomePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+/* ---------------- Auth Panel ---------------- */
+
+function AuthPanel() {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) setError(error.message);
+  };
+
+  const onRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, inviteCode }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Registration failed');
+      // Auto-login after admin create
+      const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (loginErr) throw loginErr;
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f640,transparent_60%),linear-gradient(180deg,#0b1020, #0a0f1a)]">
+      <div className="w-full max-w-md p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setMode('login')}
+            className={`flex-1 py-2 rounded-lg border ${mode==='login' ? 'border-cyan-400 text-white' : 'border-white/10 text-neutral-300'} hover:border-cyan-400 transition`}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setMode('register')}
+            className={`flex-1 py-2 rounded-lg border ${mode==='register' ? 'border-cyan-400 text-white' : 'border-white/10 text-neutral-300'} hover:border-cyan-400 transition`}
+          >
+            Register
+          </button>
+        </div>
+
+        {mode === 'login' ? (
+          <form onSubmit={onLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs text-neutral-300/90 mb-1">Email</label>
+              <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-neutral-300/90 mb-1">Password</label>
+              <input type="password" required value={password} onChange={(e)=>setPassword(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button disabled={busy} className="w-full rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-60">
+              {busy ? 'Signing in…' : 'Sign In'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={onRegister} className="space-y-4">
+            <div>
+              <label className="block text-xs text-neutral-300/90 mb-1">Invite Code</label>
+              <input type="text" required value={inviteCode} onChange={(e)=>setInviteCode(e.target.value)}
+                placeholder="ABCDEF-2025"
+                className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-neutral-300/90 mb-1">Email</label>
+              <input type="email" required value={email} onChange={(e)=>setEmail(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-neutral-300/90 mb-1">Password</label>
+              <input type="password" required value={password} onChange={(e)=>setPassword(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button disabled={busy} className="w-full rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-60">
+              {busy ? 'Registering…' : 'Register'}
+            </button>
+            <p className="text-xs text-neutral-400">
+              Registration requires a valid invite code. Ask the admin if you don’t have one.
+            </p>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }
