@@ -14,9 +14,10 @@ type DashboardStats = {
   in_transit_count: number;
   delivered_count: number;
   refunds_in_progress_count: number;
+  claims_in_progress_count: number;   // ⬅️ new
 };
 
-type StatusFilter = '' | 'in_transit' | 'delivered' | 'refunds_in_progress';
+type StatusFilter = '' | 'in_transit' | 'delivered' | 'refunds_in_progress' | 'claims_in_progress';
 
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -115,6 +116,21 @@ export default function HomePage() {
     if (!anyDone) return true;
     return false;
   };
+  const isClaimInProgress = (p: Purchase) => {
+    const claims: any[] = Array.isArray((p as any)?.claims) ? (p as any).claims : [];
+    if (claims.length === 0) return false;
+    const INPROG = new Set(['initiated','item_sent','processing','pending']);
+    const DONE = new Set(['resolved','resolved_closed','closed','denied','rejected']);
+    let anyInProgress = false, anyDone = false;
+    for (const c of claims) {
+      const s = getString(c?.status ?? '');
+      if (INPROG.has(s)) anyInProgress = true;
+      if (DONE.has(s)) anyDone = true;
+    }
+    if (anyInProgress) return true;
+    if (!anyDone) return true;
+    return false;
+  };
 
   const storeNames = [...new Set(purchases.map(p => p.store_name))].sort();
 
@@ -129,6 +145,7 @@ export default function HomePage() {
       if (statusFilter === 'delivered') return isDelivered(p);
       if (statusFilter === 'in_transit') return isInTransit(p);
       if (statusFilter === 'refunds_in_progress') return isRefundInProgress(p);
+      if (statusFilter === 'claims_in_progress') return isClaimInProgress(p);
       return true;
     });
 
@@ -173,88 +190,47 @@ export default function HomePage() {
       <path d="M12 6v6" />
     </svg>
   );
+  const ClaimIcon = (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 12l2 2 4-4" />
+      <circle cx="12" cy="12" r="9" />
+    </svg>
+  );
 
   return (
     <main className="w-full min-h-screen flex flex-col items-center bg-[radial-gradient(1200px_600px_at_50%_-10%,#3b82f6AA,transparent_60%),linear-gradient(180deg,#0b1224,#0c1020_40%,#0a0f1a)]">
-      {/* Sticky top bar (wider) */}
+      {/* Sticky top bar */}
       <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="mx-auto max-w-[1800px] px-8 py-3 flex items-center justify-between">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Personal Purchase Tracker</h1>
           <div className="flex items-center space-x-3">
-            <Link
-              href="/claims"
-              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
-            >
-              View Claims
-            </Link>
-            <Link
-              href="/refunds"
-              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
-            >
-              View Refunds
-            </Link>
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80"
-            >
-              Sign Out
-            </button>
+            <Link href="/claims" className="text-cyan-300 hover:text-white font-semibold transition">View Claims</Link>
+            <Link href="/refunds" className="text-cyan-300 hover:text-white font-semibold transition">View Refunds</Link>
+            <button onClick={() => supabase.auth.signOut()} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl">Sign Out</button>
           </div>
         </div>
       </header>
 
-      {/* Content (wider) */}
+      {/* Content */}
       <div className="w-full max-w-[1800px] px-8 py-8">
         {/* KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-          <KpiCard
-            title="In Transit"
-            value={stats?.in_transit_count}
-            active={statusFilter === 'in_transit'}
-            onClick={() => setStatusFilter(prev => prev === 'in_transit' ? '' : 'in_transit')}
-            icon={TruckIcon}
-          />
-          <KpiCard
-            title="Delivered"
-            value={stats?.delivered_count}
-            active={statusFilter === 'delivered'}
-            onClick={() => setStatusFilter(prev => prev === 'delivered' ? '' : 'delivered')}
-            icon={BoxIcon}
-          />
-          <KpiCard
-            title="Refunds in Progress"
-            value={stats?.refunds_in_progress_count}
-            active={statusFilter === 'refunds_in_progress'}
-            onClick={() => setStatusFilter(prev => prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')}
-            icon={RefundIcon}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <KpiCard title="In Transit" value={stats?.in_transit_count} active={statusFilter === 'in_transit'} onClick={() => setStatusFilter(prev => prev === 'in_transit' ? '' : 'in_transit')} icon={TruckIcon} />
+          <KpiCard title="Delivered" value={stats?.delivered_count} active={statusFilter === 'delivered'} onClick={() => setStatusFilter(prev => prev === 'delivered' ? '' : 'delivered')} icon={BoxIcon} />
+          <KpiCard title="Refunds in Progress" value={stats?.refunds_in_progress_count} active={statusFilter === 'refunds_in_progress'} onClick={() => setStatusFilter(prev => prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')} icon={RefundIcon} />
+          <KpiCard title="Claims in Progress" value={stats?.claims_in_progress_count} active={statusFilter === 'claims_in_progress'} onClick={() => setStatusFilter(prev => prev === 'claims_in_progress' ? '' : 'claims_in_progress')} icon={ClaimIcon} />
         </div>
 
         {/* Filters */}
         <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="search" className="block text-xs font-medium text-neutral-300/90 mb-1">
-                Search (Store, Order ID)
-              </label>
-              <input
-                id="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search..."
-                className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400"
-              />
+              <label htmlFor="search" className="block text-xs font-medium text-neutral-300/90 mb-1">Search (Store, Order ID)</label>
+              <input id="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search..." className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
             </div>
             <div>
-              <label htmlFor="storeFilter" className="block text-xs font-medium text-neutral-300/90 mb-1">
-                Filter by Store
-              </label>
-              <select
-                id="storeFilter"
-                value={storeFilter}
-                onChange={(e) => setStoreFilter(e.target.value)}
-                className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white focus:border-cyan-400 focus:ring-cyan-400"
-              >
+              <label htmlFor="storeFilter" className="block text-xs font-medium text-neutral-300/90 mb-1">Filter by Store</label>
+              <select id="storeFilter" value={storeFilter} onChange={(e) => setStoreFilter(e.target.value)} className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white focus:border-cyan-400 focus:ring-cyan-400">
                 <option value="">All Stores</option>
                 {storeNames.map(name => (<option key={name} value={name}>{name}</option>))}
               </select>
@@ -263,21 +239,18 @@ export default function HomePage() {
           {statusFilter && (
             <div className="mt-3 text-xs text-neutral-300/90">
               Showing: <span className="font-medium text-white">
-                {statusFilter === 'in_transit' ? 'In Transit' : statusFilter === 'delivered' ? 'Delivered' : 'Refunds in Progress'}
+                {statusFilter === 'in_transit' ? 'In Transit' : statusFilter === 'delivered' ? 'Delivered' : statusFilter === 'refunds_in_progress' ? 'Refunds in Progress' : 'Claims in Progress'}
               </span> — click the same KPI again to clear.
             </div>
           )}
         </div>
 
-        {/* Main grid: Purchases wider (2/5) */}
+        {/* Main grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-8">
-          {/* Form: span 3 */}
           <div className="xl:col-span-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-md">
             <h2 className="text-xl font-semibold text-white mb-4">Add New Purchase</h2>
             <PurchaseForm onSuccess={handleNewPurchase} />
           </div>
-
-          {/* Purchases: span 2 (wider) */}
           <div className="xl:col-span-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-md">
             <h2 className="text-xl font-semibold text-white mb-4">Your Purchases</h2>
             <PurchaseList purchases={filteredPurchases} onDelete={handleDeletePurchase} />
