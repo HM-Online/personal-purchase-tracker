@@ -36,16 +36,18 @@ export default function HomePage() {
     else setPurchases(data as Purchase[]);
     setIsLoading(false);
   }, []);
-  
+
   const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/stats');
       if (!response.ok) throw new Error('Failed to fetch stats');
       const data = await response.json();
       setStats(data);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
   }, []);
-  
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
@@ -63,7 +65,7 @@ export default function HomePage() {
       setStats(null);
     }
   }, [session, fetchPurchases, fetchStats]);
-  
+
   const handleDeletePurchase = async (purchaseId: string) => {
     const ok = window.confirm('Are you sure you want to delete this purchase? This action cannot be undone.');
     if (!ok) return;
@@ -95,8 +97,14 @@ export default function HomePage() {
   const isRefundInProgress = (p: Purchase) => {
     const refunds: any[] = Array.isArray((p as any)?.refunds) ? (p as any).refunds : [];
     if (refunds.length === 0) return false;
-    const INPROG = new Set(['in progress','in-progress','progress','pending','processing','open','opened','under review','under-review','awaiting','waiting','requested','submitted']);
-    const DONE = new Set(['completed','complete','approved','resolved','refunded','paid','closed','denied','rejected','canceled','cancelled']);
+    const INPROG = new Set([
+      'in progress','in-progress','progress','pending','processing','open','opened',
+      'under review','under-review','awaiting','waiting','requested','submitted'
+    ]);
+    const DONE = new Set([
+      'completed','complete','approved','resolved','refunded','paid','closed',
+      'denied','rejected','canceled','cancelled'
+    ]);
     let anyInProgress = false, anyDone = false;
     for (const r of refunds) {
       const s = getString(r?.status ?? r?.state ?? r?.refund_status ?? r?.current_status ?? r?.progress_status ?? '');
@@ -173,9 +181,24 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1800px] px-8 py-3 flex items-center justify-between">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Personal Purchase Tracker</h1>
           <div className="flex items-center space-x-3">
-            <Link href="/claims" className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5">View Claims</Link>
-            <Link href="/refunds" className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5">View Refunds</Link>
-            <button onClick={() => supabase.auth.signOut()} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80">Sign Out</button>
+            <Link
+              href="/claims"
+              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
+            >
+              View Claims
+            </Link>
+            <Link
+              href="/refunds"
+              className="text-cyan-300 hover:text-white font-semibold transition-shadow hover:shadow-[0_0_10px] hover:shadow-cyan-500/50 rounded px-3 py-1.5"
+            >
+              View Refunds
+            </Link>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-shadow hover:shadow-[0_0_10px] hover:shadow-red-500/80"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </header>
@@ -184,21 +207,54 @@ export default function HomePage() {
       <div className="w-full max-w-[1800px] px-8 py-8">
         {/* KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-          <KpiCard title="In Transit" value={stats?.in_transit_count} active={statusFilter === 'in_transit'} onClick={() => setStatusFilter(prev => prev === 'in_transit' ? '' : 'in_transit')} icon={TruckIcon} />
-          <KpiCard title="Delivered" value={stats?.delivered_count} active={statusFilter === 'delivered'} onClick={() => setStatusFilter(prev => prev === 'delivered' ? '' : 'delivered')} icon={BoxIcon} />
-          <KpiCard title="Refunds in Progress" value={stats?.refunds_in_progress_count} active={statusFilter === 'refunds_in_progress'} onClick={() => setStatusFilter(prev => prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')} icon={RefundIcon} />
+          <KpiCard
+            title="In Transit"
+            value={stats?.in_transit_count}
+            active={statusFilter === 'in_transit'}
+            onClick={() => setStatusFilter(prev => prev === 'in_transit' ? '' : 'in_transit')}
+            icon={TruckIcon}
+          />
+          <KpiCard
+            title="Delivered"
+            value={stats?.delivered_count}
+            active={statusFilter === 'delivered'}
+            onClick={() => setStatusFilter(prev => prev === 'delivered' ? '' : 'delivered')}
+            icon={BoxIcon}
+          />
+          <KpiCard
+            title="Refunds in Progress"
+            value={stats?.refunds_in_progress_count}
+            active={statusFilter === 'refunds_in_progress'}
+            onClick={() => setStatusFilter(prev => prev === 'refunds_in_progress' ? '' : 'refunds_in_progress')}
+            icon={RefundIcon}
+          />
         </div>
 
         {/* Filters */}
         <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="search" className="block text-xs font-medium text-neutral-300/90 mb-1">Search (Store, Order ID)</label>
-              <input id="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search..." className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400" />
+              <label htmlFor="search" className="block text-xs font-medium text-neutral-300/90 mb-1">
+                Search (Store, Order ID)
+              </label>
+              <input
+                id="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search..."
+                className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white placeholder-neutral-400 focus:border-cyan-400 focus:ring-cyan-400"
+              />
             </div>
             <div>
-              <label htmlFor="storeFilter" className="block text-xs font-medium text-neutral-300/90 mb-1">Filter by Store</label>
-              <select id="storeFilter" value={storeFilter} onChange={(e) => setStoreFilter(e.target.value)} className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white focus:border-cyan-400 focus:ring-cyan-400">
+              <label htmlFor="storeFilter" className="block text-xs font-medium text-neutral-300/90 mb-1">
+                Filter by Store
+              </label>
+              <select
+                id="storeFilter"
+                value={storeFilter}
+                onChange={(e) => setStoreFilter(e.target.value)}
+                className="block w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white focus:border-cyan-400 focus:ring-cyan-400"
+              >
                 <option value="">All Stores</option>
                 {storeNames.map(name => (<option key={name} value={name}>{name}</option>))}
               </select>
@@ -213,20 +269,16 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Main grid:
-           - 4 columns on xl screens
-           - Form uses 3 columns (wide)
-           - Purchases uses 1 column (previous, compact width)
-           - No inner scrollers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+        {/* Main grid: Purchases wider (2/5) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-8">
           {/* Form: span 3 */}
           <div className="xl:col-span-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-md">
             <h2 className="text-xl font-semibold text-white mb-4">Add New Purchase</h2>
             <PurchaseForm onSuccess={handleNewPurchase} />
           </div>
 
-          {/* Purchases: span 1 */}
-          <div className="xl:col-span-1 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-md">
+          {/* Purchases: span 2 (wider) */}
+          <div className="xl:col-span-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-md">
             <h2 className="text-xl font-semibold text-white mb-4">Your Purchases</h2>
             <PurchaseList purchases={filteredPurchases} onDelete={handleDeletePurchase} />
           </div>
