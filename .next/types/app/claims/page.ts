@@ -1,4 +1,4 @@
-// File: E:\Tracker\New folder\personal-purchase-tracker\personal-purchase-tracker\src\app\claims\page.tsx
+// File: E:\Tracker\personal-purchase-tracker\src\app\claims\page.tsx
 import * as entry from '../../../../src/app/claims/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

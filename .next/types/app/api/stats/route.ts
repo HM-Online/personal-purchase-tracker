@@ -1,4 +1,4 @@
-// File: E:\Tracker\New folder\personal-purchase-tracker\personal-purchase-tracker\src\app\api\stats\route.ts
+// File: E:\Tracker\personal-purchase-tracker\src\app\api\stats\route.ts
 import * as entry from '../../../../../src/app/api/stats/route.js'
 import type { NextRequest } from 'next/server.js'
 
