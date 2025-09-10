@@ -61,7 +61,7 @@ export default function PurchaseList({ purchases, onDelete }: PurchaseListProps)
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold mb-4 text-text-light">Your Purchases</h2>
+      
       <ul className="space-y-4">
         {purchases.map((purchase) => {
           const isExpanded = purchase.id === expandedId;
