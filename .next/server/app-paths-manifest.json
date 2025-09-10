@@ -2,7 +2,8 @@
   "/page": "app/page.js",
   "/claims/page": "app/claims/page.js",
   "/purchase/[id]/page": "app/purchase/[id]/page.js",
-  "/refunds/page": "app/refunds/page.js",
   "/settings/page": "app/settings/page.js",
-  "/api/stats/route": "app/api/stats/route.js"
+  "/refunds/page": "app/refunds/page.js",
+  "/api/stats/route": "app/api/stats/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }
