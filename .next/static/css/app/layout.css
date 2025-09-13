@@ -644,6 +644,9 @@ video {
 .max-w-md {
   max-width: 28rem;
 }
+.max-w-6xl {
+  max-width: 72rem;
+}
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -1093,6 +1096,9 @@ video {
 .leading-snug {
   line-height: 1.375;
 }
+.leading-5 {
+  line-height: 1.25rem;
+}
 .tracking-wide {
   letter-spacing: 0.025em;
 }
@@ -1204,6 +1210,9 @@ video {
 .text-yellow-300 {
   --tw-text-opacity: 1;
   color: rgb(253 224 71 / var(--tw-text-opacity, 1));
+}
+.text-neutral-300\/85 {
+  color: rgb(212 212 212 / 0.85);
 }
 .placeholder-neutral-400::-moz-placeholder {
   --tw-placeholder-opacity: 1;
