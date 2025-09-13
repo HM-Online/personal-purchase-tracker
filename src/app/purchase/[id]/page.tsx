@@ -232,21 +232,17 @@ export default function PurchaseDetailPage() {
   const fmtAmount =
     typeof purchase.amount === 'number' ? purchase.amount.toFixed(2) : undefined;
 
-  // ---------- NEW: Status badge helpers (UI only) ----------
   const titleCase = (s: string) =>
     s.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   const getPrimaryStatus = () => {
-    // If refund exists and not terminal → "Refund in Progress"
     const r = existingRefund?.status?.toLowerCase();
     const terminalRefund = new Set(['paid', 'approved', 'denied', 'completed', 'refunded', 'closed']);
     if (r && !terminalRefund.has(r)) {
       return { label: 'Refund in Progress', tone: 'warning' as const };
     }
-    // Else show shipment status if present
     const s = mainShipment?.status ? titleCase(mainShipment.status) : null;
     if (s) {
-      // Map status to tones
       const tone =
         mainShipment?.status === 'delivered'
           ? ('success' as const)
@@ -294,7 +290,6 @@ export default function PurchaseDetailPage() {
               <h1 className="text-xl md:text-2xl font-bold truncate">
                 Purchase Details: <span className="text-cyan-300">{purchase.store_name}</span>
               </h1>
-              {/* NEW: Primary status badge */}
               <Badge label={primaryStatus.label} tone={primaryStatus.tone} />
             </div>
 
@@ -304,7 +299,7 @@ export default function PurchaseDetailPage() {
 
         {/* Content */}
         <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 space-y-6">
-          {/* Order Info — glass card with full fields */}
+          {/* Order Info */}
           <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-md">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <span className="text-cyan-400">📦</span> Order Information
@@ -317,40 +312,18 @@ export default function PurchaseDetailPage() {
                 <span className="text-neutral-400">Order Date:</span>{' '}
                 {new Date(purchase.order_date).toLocaleDateString()}
               </p>
-              {fmtAmount && (
-                <p><span className="text-neutral-400">Amount:</span> {fmtAmount}</p>
-              )}
-              {purchase.payment_method && (
-                <p><span className="text-neutral-400">Payment Method:</span> {purchase.payment_method}</p>
-              )}
-              {purchase.email_used && (
-                <p className="truncate">
-                  <span className="text-neutral-400">Email:</span> {purchase.email_used}
-                </p>
-              )}
-              {purchase.phone_number && (
-                <p className="truncate">
-                  <span className="text-neutral-400">Phone:</span> {purchase.phone_number}
-                </p>
-              )}
-              {mainShipment?.tracking_number && (
-                <p className="truncate">
-                  <span className="text-neutral-400">Tracking #:</span> {mainShipment.tracking_number}
-                </p>
-              )}
-              {mainShipment?.courier && (
-                <p className="truncate">
-                  <span className="text-neutral-400">Courier:</span> {mainShipment.courier}
-                </p>
-              )}
+              {fmtAmount && (<p><span className="text-neutral-400">Amount:</span> {fmtAmount}</p>)}
+              {purchase.payment_method && (<p><span className="text-neutral-400">Payment Method:</span> {purchase.payment_method}</p>)}
+              {purchase.email_used && (<p className="truncate"><span className="text-neutral-400">Email:</span> {purchase.email_used}</p>)}
+              {purchase.phone_number && (<p className="truncate"><span className="text-neutral-400">Phone:</span> {purchase.phone_number}</p>)}
+              {mainShipment?.tracking_number && (<p className="truncate"><span className="text-neutral-400">Tracking #:</span> {mainShipment.tracking_number}</p>)}
+              {mainShipment?.courier && (<p className="truncate"><span className="text-neutral-400">Courier:</span> {mainShipment.courier}</p>)}
             </div>
 
             {purchase.shipping_address && (
               <div className="mt-4">
                 <p className="text-neutral-400 mb-1">Shipping Address</p>
-                <div className="whitespace-pre-line text-neutral-200">
-                  {purchase.shipping_address}
-                </div>
+                <div className="whitespace-pre-line text-neutral-200">{purchase.shipping_address}</div>
               </div>
             )}
 
