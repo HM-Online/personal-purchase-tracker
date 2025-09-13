@@ -12,7 +12,7 @@ exports.id = "app/page";
 exports.ids = ["app/page"];
 exports.modules = {
 
-/***/ "./action-async-storage.external":
+/***/ "./action-async-storage.external?9022":
 /*!****************************************************************************!*\
   !*** external "next/dist/client/components/action-async-storage.external" ***!
   \****************************************************************************/
@@ -23,7 +23,7 @@ module.exports = require("next/dist/client/components/action-async-storage.exter
 
 /***/ }),
 
-/***/ "../../client/components/action-async-storage.external":
+/***/ "./action-async-storage.external?8dda":
 /*!*******************************************************************************!*\
   !*** external "next/dist/client/components/action-async-storage.external.js" ***!
   \*******************************************************************************/
@@ -34,7 +34,7 @@ module.exports = require("next/dist/client/components/action-async-storage.exter
 
 /***/ }),
 
-/***/ "./request-async-storage.external":
+/***/ "./request-async-storage.external?93d0":
 /*!*****************************************************************************!*\
   !*** external "next/dist/client/components/request-async-storage.external" ***!
   \*****************************************************************************/
@@ -45,7 +45,7 @@ module.exports = require("next/dist/client/components/request-async-storage.exte
 
 /***/ }),
 
-/***/ "../../client/components/request-async-storage.external":
+/***/ "./request-async-storage.external?3d59":
 /*!********************************************************************************!*\
   !*** external "next/dist/client/components/request-async-storage.external.js" ***!
   \********************************************************************************/
@@ -56,7 +56,7 @@ module.exports = require("next/dist/client/components/request-async-storage.exte
 
 /***/ }),
 
-/***/ "./static-generation-async-storage.external":
+/***/ "./static-generation-async-storage.external?d822":
 /*!***************************************************************************************!*\
   !*** external "next/dist/client/components/static-generation-async-storage.external" ***!
   \***************************************************************************************/
@@ -67,7 +67,7 @@ module.exports = require("next/dist/client/components/static-generation-async-st
 
 /***/ }),
 
-/***/ "../../client/components/static-generation-async-storage.external":
+/***/ "./static-generation-async-storage.external?16bc":
 /*!******************************************************************************************!*\
   !*** external "next/dist/client/components/static-generation-async-storage.external.js" ***!
   \******************************************************************************************/
@@ -209,13 +209,13 @@ eval("Promise.resolve(/*! import() eager */).then(__webpack_require__.t.bind(__w
 
 /***/ }),
 
-/***/ "(ssr)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Capp%5C%5Cglobals.css%22%2C%22ids%22%3A%5B%5D%7D&server=true!":
-/*!***************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Capp%5C%5Cglobals.css%22%2C%22ids%22%3A%5B%5D%7D&server=true! ***!
-  \***************************************************************************************************************************************************************************************************************************************************/
-/***/ (() => {
+/***/ "(ssr)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Capp%5C%5Cglobals.css%22%2C%22ids%22%3A%5B%5D%7D&modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Ccomponents%5C%5CToasterClient.tsx%22%2C%22ids%22%3A%5B%22default%22%5D%7D&server=true!":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Capp%5C%5Cglobals.css%22%2C%22ids%22%3A%5B%5D%7D&modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Ccomponents%5C%5CToasterClient.tsx%22%2C%22ids%22%3A%5B%22default%22%5D%7D&server=true! ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-
+eval("Promise.resolve(/*! import() eager */).then(__webpack_require__.bind(__webpack_require__, /*! ./src/components/ToasterClient.tsx */ \"(ssr)/./src/components/ToasterClient.tsx\"));\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHNzcikvLi9ub2RlX21vZHVsZXMvbmV4dC9kaXN0L2J1aWxkL3dlYnBhY2svbG9hZGVycy9uZXh0LWZsaWdodC1jbGllbnQtZW50cnktbG9hZGVyLmpzP21vZHVsZXM9JTdCJTIycmVxdWVzdCUyMiUzQSUyMkUlM0ElNUMlNUNUcmFja2VyJTVDJTVDcGVyc29uYWwtcHVyY2hhc2UtdHJhY2tlciU1QyU1Q3NyYyU1QyU1Q2FwcCU1QyU1Q2dsb2JhbHMuY3NzJTIyJTJDJTIyaWRzJTIyJTNBJTVCJTVEJTdEJm1vZHVsZXM9JTdCJTIycmVxdWVzdCUyMiUzQSUyMkUlM0ElNUMlNUNUcmFja2VyJTVDJTVDcGVyc29uYWwtcHVyY2hhc2UtdHJhY2tlciU1QyU1Q3NyYyU1QyU1Q2NvbXBvbmVudHMlNUMlNUNUb2FzdGVyQ2xpZW50LnRzeCUyMiUyQyUyMmlkcyUyMiUzQSU1QiUyMmRlZmF1bHQlMjIlNUQlN0Qmc2VydmVyPXRydWUhIiwibWFwcGluZ3MiOiJBQUFBLGdMQUE0SSIsInNvdXJjZXMiOlsid2VicGFjazovL3BlcnNvbmFsdHJhY2tlci8/ZWI5OSJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQoLyogd2VicGFja01vZGU6IFwiZWFnZXJcIiwgd2VicGFja0V4cG9ydHM6IFtcImRlZmF1bHRcIl0gKi8gXCJFOlxcXFxUcmFja2VyXFxcXHBlcnNvbmFsLXB1cmNoYXNlLXRyYWNrZXJcXFxcc3JjXFxcXGNvbXBvbmVudHNcXFxcVG9hc3RlckNsaWVudC50c3hcIik7XG4iXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///(ssr)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Capp%5C%5Cglobals.css%22%2C%22ids%22%3A%5B%5D%7D&modules=%7B%22request%22%3A%22E%3A%5C%5CTracker%5C%5Cpersonal-purchase-tracker%5C%5Csrc%5C%5Ccomponents%5C%5CToasterClient.tsx%22%2C%22ids%22%3A%5B%22default%22%5D%7D&server=true!\n");
 
 /***/ }),
 
@@ -273,6 +273,17 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
+/***/ "(ssr)/./src/components/ToasterClient.tsx":
+/*!******************************************!*\
+  !*** ./src/components/ToasterClient.tsx ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ ToasterClient)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"(ssr)/./node_modules/next/dist/server/future/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react_hot_toast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-hot-toast */ \"(ssr)/./node_modules/react-hot-toast/dist/index.mjs\");\n/* __next_internal_client_entry_do_not_use__ default auto */ \n\nfunction ToasterClient() {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(react_hot_toast__WEBPACK_IMPORTED_MODULE_1__.Toaster, {\n        position: \"top-right\",\n        toastOptions: {\n            style: {\n                background: \"rgba(17, 24, 39, 0.9)\",\n                color: \"white\",\n                border: \"1px solid rgba(255,255,255,0.08)\",\n                backdropFilter: \"blur(8px)\"\n            },\n            success: {\n                iconTheme: {\n                    primary: \"#22c55e\",\n                    secondary: \"#0b1224\"\n                }\n            },\n            error: {\n                iconTheme: {\n                    primary: \"#ef4444\",\n                    secondary: \"#0b1224\"\n                }\n            }\n        }\n    }, void 0, false, {\n        fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\components\\\\ToasterClient.tsx\",\n        lineNumber: 7,\n        columnNumber: 5\n    }, this);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHNzcikvLi9zcmMvY29tcG9uZW50cy9Ub2FzdGVyQ2xpZW50LnRzeCIsIm1hcHBpbmdzIjoiOzs7Ozs7OztBQUUwQztBQUUzQixTQUFTQztJQUN0QixxQkFDRSw4REFBQ0Qsb0RBQU9BO1FBQ05FLFVBQVM7UUFDVEMsY0FBYztZQUNaQyxPQUFPO2dCQUNMQyxZQUFZO2dCQUNaQyxPQUFPO2dCQUNQQyxRQUFRO2dCQUNSQyxnQkFBZ0I7WUFDbEI7WUFDQUMsU0FBUztnQkFDUEMsV0FBVztvQkFBRUMsU0FBUztvQkFBV0MsV0FBVztnQkFBVTtZQUN4RDtZQUNBQyxPQUFPO2dCQUNMSCxXQUFXO29CQUFFQyxTQUFTO29CQUFXQyxXQUFXO2dCQUFVO1lBQ3hEO1FBQ0Y7Ozs7OztBQUdOIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vcGVyc29uYWx0cmFja2VyLy4vc3JjL2NvbXBvbmVudHMvVG9hc3RlckNsaWVudC50c3g/MWM4MSJdLCJzb3VyY2VzQ29udGVudCI6WyIndXNlIGNsaWVudCc7XHJcblxyXG5pbXBvcnQgeyBUb2FzdGVyIH0gZnJvbSAncmVhY3QtaG90LXRvYXN0JztcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIFRvYXN0ZXJDbGllbnQoKSB7XHJcbiAgcmV0dXJuIChcclxuICAgIDxUb2FzdGVyXHJcbiAgICAgIHBvc2l0aW9uPVwidG9wLXJpZ2h0XCJcclxuICAgICAgdG9hc3RPcHRpb25zPXt7XHJcbiAgICAgICAgc3R5bGU6IHtcclxuICAgICAgICAgIGJhY2tncm91bmQ6ICdyZ2JhKDE3LCAyNCwgMzksIDAuOSknLFxyXG4gICAgICAgICAgY29sb3I6ICd3aGl0ZScsXHJcbiAgICAgICAgICBib3JkZXI6ICcxcHggc29saWQgcmdiYSgyNTUsMjU1LDI1NSwwLjA4KScsXHJcbiAgICAgICAgICBiYWNrZHJvcEZpbHRlcjogJ2JsdXIoOHB4KScsXHJcbiAgICAgICAgfSxcclxuICAgICAgICBzdWNjZXNzOiB7XHJcbiAgICAgICAgICBpY29uVGhlbWU6IHsgcHJpbWFyeTogJyMyMmM1NWUnLCBzZWNvbmRhcnk6ICcjMGIxMjI0JyB9LFxyXG4gICAgICAgIH0sXHJcbiAgICAgICAgZXJyb3I6IHtcclxuICAgICAgICAgIGljb25UaGVtZTogeyBwcmltYXJ5OiAnI2VmNDQ0NCcsIHNlY29uZGFyeTogJyMwYjEyMjQnIH0sXHJcbiAgICAgICAgfSxcclxuICAgICAgfX1cclxuICAgIC8+XHJcbiAgKTtcclxufVxyXG4iXSwibmFtZXMiOlsiVG9hc3RlciIsIlRvYXN0ZXJDbGllbnQiLCJwb3NpdGlvbiIsInRvYXN0T3B0aW9ucyIsInN0eWxlIiwiYmFja2dyb3VuZCIsImNvbG9yIiwiYm9yZGVyIiwiYmFja2Ryb3BGaWx0ZXIiLCJzdWNjZXNzIiwiaWNvblRoZW1lIiwicHJpbWFyeSIsInNlY29uZGFyeSIsImVycm9yIl0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(ssr)/./src/components/ToasterClient.tsx\n");
+
+/***/ }),
+
 /***/ "(ssr)/./src/lib/supabaseClient.ts":
 /*!***********************************!*\
   !*** ./src/lib/supabaseClient.ts ***!
@@ -302,7 +313,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ RootLayout),\n/* harmony export */   metadata: () => (/* binding */ metadata)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"(rsc)/./node_modules/next/dist/server/future/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _globals_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./globals.css */ \"(rsc)/./src/app/globals.css\");\n// src/app/layout.tsx\n\n\nconst metadata = {\n    title: \"Personal Purchase Tracker\",\n    description: \"Track your online purchases, refunds, and claims.\"\n};\nfunction RootLayout({ children }) {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"html\", {\n        lang: \"en\",\n        children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"body\", {\n            className: \"bg-background-dark text-text-light min-h-screen\",\n            children: children\n        }, void 0, false, {\n            fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\app\\\\layout.tsx\",\n            lineNumber: 13,\n            columnNumber: 7\n        }, this)\n    }, void 0, false, {\n        fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\app\\\\layout.tsx\",\n        lineNumber: 12,\n        columnNumber: 5\n    }, this);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9zcmMvYXBwL2xheW91dC50c3giLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFBQSxxQkFBcUI7O0FBRUU7QUFFaEIsTUFBTUEsV0FBcUI7SUFDaENDLE9BQU87SUFDUEMsYUFBYTtBQUNmLEVBQUU7QUFFYSxTQUFTQyxXQUFXLEVBQUVDLFFBQVEsRUFBaUM7SUFDNUUscUJBQ0UsOERBQUNDO1FBQUtDLE1BQUs7a0JBQ1QsNEVBQUNDO1lBQUtDLFdBQVU7c0JBQ2JKOzs7Ozs7Ozs7OztBQUlUIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vcGVyc29uYWx0cmFja2VyLy4vc3JjL2FwcC9sYXlvdXQudHN4PzU3YTkiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gc3JjL2FwcC9sYXlvdXQudHN4XHJcbmltcG9ydCB0eXBlIHsgTWV0YWRhdGEgfSBmcm9tIFwibmV4dFwiO1xyXG5pbXBvcnQgXCIuL2dsb2JhbHMuY3NzXCI7XHJcblxyXG5leHBvcnQgY29uc3QgbWV0YWRhdGE6IE1ldGFkYXRhID0ge1xyXG4gIHRpdGxlOiBcIlBlcnNvbmFsIFB1cmNoYXNlIFRyYWNrZXJcIixcclxuICBkZXNjcmlwdGlvbjogXCJUcmFjayB5b3VyIG9ubGluZSBwdXJjaGFzZXMsIHJlZnVuZHMsIGFuZCBjbGFpbXMuXCIsXHJcbn07XHJcblxyXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBSb290TGF5b3V0KHsgY2hpbGRyZW4gfTogeyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlIH0pIHtcclxuICByZXR1cm4gKFxyXG4gICAgPGh0bWwgbGFuZz1cImVuXCI+XHJcbiAgICAgIDxib2R5IGNsYXNzTmFtZT1cImJnLWJhY2tncm91bmQtZGFyayB0ZXh0LXRleHQtbGlnaHQgbWluLWgtc2NyZWVuXCI+XHJcbiAgICAgICAge2NoaWxkcmVufVxyXG4gICAgICA8L2JvZHk+XHJcbiAgICA8L2h0bWw+XHJcbiAgKTtcclxufVxyXG4iXSwibmFtZXMiOlsibWV0YWRhdGEiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwiUm9vdExheW91dCIsImNoaWxkcmVuIiwiaHRtbCIsImxhbmciLCJib2R5IiwiY2xhc3NOYW1lIl0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./src/app/layout.tsx\n");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ RootLayout),\n/* harmony export */   metadata: () => (/* binding */ metadata)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"(rsc)/./node_modules/next/dist/server/future/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _globals_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./globals.css */ \"(rsc)/./src/app/globals.css\");\n/* harmony import */ var _components_ToasterClient__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/components/ToasterClient */ \"(rsc)/./src/components/ToasterClient.tsx\");\n// src/app/layout.tsx\n\n\n\nconst metadata = {\n    title: \"Personal Purchase Tracker\",\n    description: \"Track your online purchases, refunds, and claims.\"\n};\nfunction RootLayout({ children }) {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"html\", {\n        lang: \"en\",\n        children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(\"body\", {\n            className: \"bg-background-dark text-text-light min-h-screen\",\n            children: [\n                children,\n                /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(_components_ToasterClient__WEBPACK_IMPORTED_MODULE_2__[\"default\"], {}, void 0, false, {\n                    fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\app\\\\layout.tsx\",\n                    lineNumber: 17,\n                    columnNumber: 9\n                }, this)\n            ]\n        }, void 0, true, {\n            fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\app\\\\layout.tsx\",\n            lineNumber: 14,\n            columnNumber: 7\n        }, this)\n    }, void 0, false, {\n        fileName: \"E:\\\\Tracker\\\\personal-purchase-tracker\\\\src\\\\app\\\\layout.tsx\",\n        lineNumber: 13,\n        columnNumber: 5\n    }, this);\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9zcmMvYXBwL2xheW91dC50c3giLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0FBQUEscUJBQXFCOztBQUVFO0FBQ2dDO0FBRWhELE1BQU1DLFdBQXFCO0lBQ2hDQyxPQUFPO0lBQ1BDLGFBQWE7QUFDZixFQUFFO0FBRWEsU0FBU0MsV0FBVyxFQUFFQyxRQUFRLEVBQWlDO0lBQzVFLHFCQUNFLDhEQUFDQztRQUFLQyxNQUFLO2tCQUNULDRFQUFDQztZQUFLQyxXQUFVOztnQkFDYko7OEJBRUQsOERBQUNMLGlFQUFhQTs7Ozs7Ozs7Ozs7Ozs7OztBQUl0QiIsInNvdXJjZXMiOlsid2VicGFjazovL3BlcnNvbmFsdHJhY2tlci8uL3NyYy9hcHAvbGF5b3V0LnRzeD81N2E5Il0sInNvdXJjZXNDb250ZW50IjpbIi8vIHNyYy9hcHAvbGF5b3V0LnRzeFxyXG5pbXBvcnQgdHlwZSB7IE1ldGFkYXRhIH0gZnJvbSBcIm5leHRcIjtcclxuaW1wb3J0IFwiLi9nbG9iYWxzLmNzc1wiO1xyXG5pbXBvcnQgVG9hc3RlckNsaWVudCBmcm9tIFwiQC9jb21wb25lbnRzL1RvYXN0ZXJDbGllbnRcIjtcclxuXHJcbmV4cG9ydCBjb25zdCBtZXRhZGF0YTogTWV0YWRhdGEgPSB7XHJcbiAgdGl0bGU6IFwiUGVyc29uYWwgUHVyY2hhc2UgVHJhY2tlclwiLFxyXG4gIGRlc2NyaXB0aW9uOiBcIlRyYWNrIHlvdXIgb25saW5lIHB1cmNoYXNlcywgcmVmdW5kcywgYW5kIGNsYWltcy5cIixcclxufTtcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIFJvb3RMYXlvdXQoeyBjaGlsZHJlbiB9OiB7IGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGUgfSkge1xyXG4gIHJldHVybiAoXHJcbiAgICA8aHRtbCBsYW5nPVwiZW5cIj5cclxuICAgICAgPGJvZHkgY2xhc3NOYW1lPVwiYmctYmFja2dyb3VuZC1kYXJrIHRleHQtdGV4dC1saWdodCBtaW4taC1zY3JlZW5cIj5cclxuICAgICAgICB7Y2hpbGRyZW59XHJcbiAgICAgICAgey8qIEdsb2JhbCB0b2FzdCBwb3J0YWwgKi99XHJcbiAgICAgICAgPFRvYXN0ZXJDbGllbnQgLz5cclxuICAgICAgPC9ib2R5PlxyXG4gICAgPC9odG1sPlxyXG4gICk7XHJcbn1cclxuIl0sIm5hbWVzIjpbIlRvYXN0ZXJDbGllbnQiLCJtZXRhZGF0YSIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJSb290TGF5b3V0IiwiY2hpbGRyZW4iLCJodG1sIiwibGFuZyIsImJvZHkiLCJjbGFzc05hbWUiXSwic291cmNlUm9vdCI6IiJ9\n//# sourceURL=webpack-internal:///(rsc)/./src/app/layout.tsx\n");
 
 /***/ }),
 
@@ -335,6 +346,35 @@ const __default__ = proxy.default;
 
 /***/ }),
 
+/***/ "(rsc)/./src/components/ToasterClient.tsx":
+/*!******************************************!*\
+  !*** ./src/components/ToasterClient.tsx ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   $$typeof: () => (/* binding */ $$typeof),
+/* harmony export */   __esModule: () => (/* binding */ __esModule),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var next_dist_build_webpack_loaders_next_flight_loader_module_proxy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! next/dist/build/webpack/loaders/next-flight-loader/module-proxy */ "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-loader/module-proxy.js");
+
+const proxy = (0,next_dist_build_webpack_loaders_next_flight_loader_module_proxy__WEBPACK_IMPORTED_MODULE_0__.createProxy)(String.raw`E:\Tracker\personal-purchase-tracker\src\components\ToasterClient.tsx`)
+
+// Accessing the __esModule property and exporting $$typeof are required here.
+// The __esModule getter forces the proxy target to create the default export
+// and the $$typeof value is for rendering logic to determine if the module
+// is a client boundary.
+const { __esModule, $$typeof } = proxy;
+const __default__ = proxy.default;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,next_dist_build_webpack_loaders_next_flight_loader_module_proxy__WEBPACK_IMPORTED_MODULE_0__.createProxy)(String.raw`E:\Tracker\personal-purchase-tracker\src\components\ToasterClient.tsx#default`));
+
+
+/***/ }),
+
 /***/ "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-metadata-image-loader.js?type=favicon&segment=&basePath=&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js!./src/app/favicon.ico?__next_metadata__":
 /*!**************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/next/dist/build/webpack/loaders/next-metadata-image-loader.js?type=favicon&segment=&basePath=&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js!./src/app/favicon.ico?__next_metadata__ ***!
@@ -353,7 +393,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 var __webpack_require__ = require("../webpack-runtime.js");
 __webpack_require__.C(exports);
 var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-var __webpack_exports__ = __webpack_require__.X(0, ["vendor-chunks/next","vendor-chunks/@supabase","vendor-chunks/tr46","vendor-chunks/whatwg-url","vendor-chunks/set-cookie-parser","vendor-chunks/webidl-conversions","vendor-chunks/jose","vendor-chunks/@swc","vendor-chunks/framer-motion","vendor-chunks/motion-dom","vendor-chunks/motion-utils","vendor-chunks/@stitches"], () => (__webpack_exec__("(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader.js?name=app%2Fpage&page=%2Fpage&appPaths=%2Fpage&pagePath=private-next-app-dir%2Fpage.tsx&appDir=E%3A%5CTracker%5Cpersonal-purchase-tracker%5Csrc%5Capp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=E%3A%5CTracker%5Cpersonal-purchase-tracker&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!")));
+var __webpack_exports__ = __webpack_require__.X(0, ["vendor-chunks/next","vendor-chunks/@supabase","vendor-chunks/tr46","vendor-chunks/whatwg-url","vendor-chunks/react-hot-toast","vendor-chunks/set-cookie-parser","vendor-chunks/webidl-conversions","vendor-chunks/jose","vendor-chunks/goober","vendor-chunks/@swc","vendor-chunks/framer-motion","vendor-chunks/motion-dom","vendor-chunks/motion-utils","vendor-chunks/@stitches"], () => (__webpack_exec__("(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader.js?name=app%2Fpage&page=%2Fpage&appPaths=%2Fpage&pagePath=private-next-app-dir%2Fpage.tsx&appDir=E%3A%5CTracker%5Cpersonal-purchase-tracker%5Csrc%5Capp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=E%3A%5CTracker%5Cpersonal-purchase-tracker&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!")));
 module.exports = __webpack_exports__;
 
 })();
