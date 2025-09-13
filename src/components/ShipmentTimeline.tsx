@@ -12,7 +12,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
 
   const shipment = shipments[0];
 
-  // --- Edit/Delete state ---
+  // --- Edit/Delete state (unchanged logic) ---
   const [isEditing, setIsEditing] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState<string>(shipment?.tracking_number ?? '');
   const [courier, setCourier] = useState<string>(shipment?.courier ?? '');
@@ -20,11 +20,10 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
   const [deleting, setDeleting] = useState(false);
 
   // Helper function to format status text nicely
-  const formatStatus = (status: string) => {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
+  const formatStatus = (status: string) =>
+    status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
-  // --- Actions ---
+  // --- Actions (unchanged logic) ---
   const handleSave = async () => {
     if (!shipment) return;
     const id = (shipment as any)?.id;
@@ -49,7 +48,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
 
       if (error) throw error;
       setIsEditing(false);
-      // Simple & safe: reload to reflect changes everywhere
+      // Keep it simple/safe: reload to reflect everywhere
       window.location.reload();
     } catch (err: any) {
       alert(`Failed to update tracking: ${err?.message || err}`);
@@ -80,19 +79,34 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
     }
   };
 
+  // Small chip components for a cleaner header (UI only)
+  const Chip = ({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) => (
+    <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-neutral-200">
+      {icon ? <span className="text-cyan-300">{icon}</span> : null}
+      <span className="font-medium truncate">{children}</span>
+    </div>
+  );
+
+  const StatusPill = ({ label }: { label: string }) => (
+    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-300">
+      {label}
+    </div>
+  );
+
   return (
-    <div>
-      {/* Top info + actions */}
-      <div className="mb-4 flex items-start justify-between gap-3">
-        {/* Left: tracking info OR edit form */}
+    <div className="space-y-4">
+      {/* Top: info + actions */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        {/* Left: chips or edit form */}
         {!isEditing ? (
-          <div>
-            <p>
-              <strong>Tracking Number:</strong> {shipment.tracking_number || '—'}
-            </p>
-            <p>
-              <strong>Courier:</strong> {shipment.courier || '—'}
-            </p>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Chip icon={<span>#</span>}>
+              {shipment.tracking_number || '—'}
+            </Chip>
+            <Chip icon={<span>🏷️</span>}>
+              {shipment.courier || '—'}
+            </Chip>
+            <StatusPill label={formatStatus(shipment.status || 'in_transit')} />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
@@ -102,7 +116,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
                 type="text"
                 value={trackingNumber}
                 onChange={(e) => setTrackingNumber(e.target.value)}
-                className="w-full rounded-md border border-neutral-700 bg-neutral-950 p-2 text-white placeholder-neutral-500 focus:border-cyan-500 focus:ring-cyan-500"
+                className="w-full rounded-md border border-white/10 bg-black/40 p-2.5 text-white placeholder-neutral-500 focus:border-cyan-400 focus:ring-cyan-400"
                 placeholder="e.g., 1Z999AA10123456784"
               />
             </div>
@@ -112,7 +126,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
                 type="text"
                 value={courier}
                 onChange={(e) => setCourier(e.target.value)}
-                className="w-full rounded-md border border-neutral-700 bg-neutral-950 p-2 text-white placeholder-neutral-500 focus:border-cyan-500 focus:ring-cyan-500"
+                className="w-full rounded-md border border-white/10 bg-black/40 p-2.5 text-white placeholder-neutral-500 focus:border-cyan-400 focus:ring-cyan-400"
                 placeholder="e.g., DHL / UPS / FedEx"
               />
             </div>
@@ -130,7 +144,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
                   setTrackingNumber(shipment?.tracking_number ?? '');
                   setCourier(shipment?.courier ?? '');
                 }}
-                className="inline-flex items-center rounded-md border border-neutral-700 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-900 transition"
+                className="inline-flex items-center rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/5 transition"
               >
                 Cancel
               </button>
@@ -143,7 +157,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center rounded-md border border-neutral-700 px-3 py-2 text-sm font-semibold text-white hover:bg-neutral-900 transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/50"
+              className="inline-flex items-center rounded-md border border-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/5 transition-shadow hover:shadow-[0_0_8px] hover:shadow-cyan-500/50"
             >
               Edit Tracking
             </button>
@@ -159,38 +173,37 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
       </div>
 
       {/* Timeline */}
-      <div className="relative border-l-2 border-neutral-700 ml-3 pt-2">
+      <div className="relative pl-5">
+        {/* vertical line */}
+        <div className="absolute left-1 top-0 h-full w-px bg-white/10" />
         {shipment.checkpoints && shipment.checkpoints.length > 0 ? (
           shipment.checkpoints.map((checkpoint: Checkpoint, index: number) => (
-            <div key={index} className="mb-8 ml-6">
-              <span className="absolute flex items-center justify-center w-6 h-6 bg-neutral-900 rounded-full -left-3 ring-8 ring-neutral-950" />
-              <h3 className="font-semibold text-white">{checkpoint.description}</h3>
-              <p className="text-sm text-neutral-400">{checkpoint.location}</p>
-              <time className="block text-xs font-normal text-neutral-500">
-                {new Date(checkpoint.time).toLocaleString()}
-              </time>
+            <div key={index} className="relative mb-6">
+              {/* dot */}
+              <span className="absolute left-0 mt-1 flex h-3.5 w-3.5 translate-x-[-6px] items-center justify-center rounded-full bg-cyan-600 ring-4 ring-black/40" />
+              <div className="rounded-md border border-white/10 bg-white/5 p-3">
+                <h3 className="text-sm font-semibold text-white">{checkpoint.description}</h3>
+                {checkpoint.location && (
+                  <p className="text-xs text-neutral-400">{checkpoint.location}</p>
+                )}
+                <time className="mt-1 block text-[11px] text-neutral-500">
+                  {new Date(checkpoint.time).toLocaleString()}
+                </time>
+              </div>
             </div>
           ))
         ) : (
-          <div className="mb-8 ml-6">
-            <span className="absolute flex items-center justify-center w-6 h-6 bg-neutral-900 rounded-full -left-3 ring-8 ring-neutral-950">
-              <svg
-                className="w-2.5 h-2.5 text-cyan-300"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4Z" />
-                <path d="M0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-              </svg>
-            </span>
-            <h3 className="flex items-center mb-1 text-lg font-semibold text-white">
-              {formatStatus(shipment.status || 'in_transit')}
-            </h3>
-            <p className="text-base font-normal text-neutral-400">
-              This is the current status of the shipment. Live scan data will appear here once available.
-            </p>
+          <div className="relative mb-2">
+            <span className="absolute left-0 mt-1 flex h-3.5 w-3.5 translate-x-[-6px] items-center justify-center rounded-full bg-cyan-600 ring-4 ring-black/40" />
+            <div className="rounded-md border border-white/10 bg-white/5 p-3">
+              <h3 className="text-sm font-semibold text-white">
+                {formatStatus(shipment.status || 'in_transit')}
+              </h3>
+              <p className="text-xs text-neutral-400">
+                This is the current status of the shipment. Live scan data will appear here once
+                available.
+              </p>
+            </div>
           </div>
         )}
       </div>
