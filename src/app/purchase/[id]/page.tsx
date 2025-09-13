@@ -8,7 +8,6 @@ import Link from 'next/link';
 import ShipmentTimeline from '@/components/ShipmentTimeline';
 import RefundModal, { RefundFormData } from '@/components/RefundModal';
 import ClaimModal, { ClaimFormData } from '@/components/ClaimModal';
-import { toast } from 'react-hot-toast';
 
 async function sendNotification(message: string) {
   await fetch('/api/notify', {
@@ -18,7 +17,7 @@ async function sendNotification(message: string) {
   });
 }
 
-/** Add Tracking (same logic, with toasts) */
+/** Add Tracking (same logic, glass UI only) */
 const AddTrackingForm = ({
   purchaseId,
   onSave,
@@ -33,7 +32,7 @@ const AddTrackingForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber || !courier) {
-      toast.error('Please provide both a tracking number and a courier.');
+      alert('Please provide both a tracking number and a courier.');
       return;
     }
     setIsSaving(true);
@@ -45,7 +44,7 @@ const AddTrackingForm = ({
     });
 
     if (insertError) {
-      toast.error(insertError.message);
+      alert('Error saving tracking info: ' + insertError.message);
       setIsSaving(false);
       return;
     }
@@ -57,13 +56,12 @@ const AddTrackingForm = ({
         body: JSON.stringify({ tracking_number: trackingNumber, courier }),
       });
       if (!response.ok) throw new Error('Ship24 API call failed');
-    } catch (error: any) {
-      // Not fatal for UI; tracking is stored locally anyway
+    } catch (error) {
       console.error('Failed to initiate tracking with Ship24', error);
     }
 
     setIsSaving(false);
-    toast.success('Tracking information saved and activated!');
+    alert('Tracking information saved and activated!');
     onSave();
   };
 
@@ -157,12 +155,13 @@ export default function PurchaseDetailPage() {
       .update({ status: newStatus })
       .eq('id', shipmentId);
     if (error) {
-      { toast.error(error.message); }
+      alert('Error updating status: ' + error.message);
     } else {
-      const statusText = newStatus.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+      const statusText = newStatus
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (l) => l.toUpperCase());
       const message = `✍️ <b>Manual Status Update!</b>\n--------------------------------------\n<b>Store:</b> ${purchase?.store_name}\n<b>Order ID:</b> ${purchase?.order_id}\n<b>New Status:</b> ${statusText}`;
       await sendNotification(message);
-      toast.success('Shipment status updated');
       fetchPurchaseDetails();
     }
   };
@@ -179,11 +178,11 @@ export default function PurchaseDetailPage() {
         refund_start_date: formData.refund_start_date || new Date(),
       });
     if (error) {
-      toast.error(error.message);
+      alert('Error starting refund: ' + error.message);
     } else {
       const message = `⚠️ <b>Refund Requested!</b>\n--------------------------------------\n<b>Store:</b> ${purchase.store_name}\n<b>Order ID:</b> ${purchase.order_id}\n<b>Amount:</b> ${formData.amount || 'N/A'}`;
       await sendNotification(message);
-      toast.success('Refund process started');
+      alert('Claim process started successfully!');
       setIsRefundModalOpen(false);
       fetchPurchaseDetails();
     }
@@ -197,11 +196,11 @@ export default function PurchaseDetailPage() {
       .from('claims')
       .insert({ purchase_id: purchase.id, status: 'initiated', ...formData });
     if (error) {
-      toast.error(error.message);
+      alert('Error starting claim: ' + error.message);
     } else {
       const message = `🔧 <b>Warranty Claim Initiated!</b>\n--------------------------------------\n<b>Store:</b> ${purchase.store_name}\n<b>Order ID:</b> ${purchase.order_id}\n<b>Reason:</b> ${formData.reason}`;
       await sendNotification(message);
-      toast.success('Claim process started');
+      alert('Claim process started successfully!');
       setIsClaimModalOpen(false);
       fetchPurchaseDetails();
     }
@@ -235,12 +234,14 @@ export default function PurchaseDetailPage() {
   const fmtAmount =
     typeof purchase.amount === 'number' ? purchase.amount.toFixed(2) : undefined;
 
+  // ---------- Helpers for header badges ----------
   const titleCase = (s: string) =>
     s.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
+  // Primary badge (shipment unless refund in progress)
   const getPrimaryStatus = () => {
     const r = existingRefund?.status?.toLowerCase();
-    const terminalRefund = new Set(['paid', 'approved', 'denied', 'completed', 'refunded', 'closed']);
+    const terminalRefund = new Set(['paid', 'approved', 'denied', 'completed', 'refunded', 'closed', 'resolved']);
     if (r && !terminalRefund.has(r)) {
       return { label: 'Refund in Progress', tone: 'warning' as const };
     }
@@ -259,6 +260,25 @@ export default function PurchaseDetailPage() {
     return { label: 'No Shipment', tone: 'neutral' as const };
   };
 
+  // Extra badges: refund & claim
+  const getRefundBadge = () => {
+    if (!existingRefund) return null;
+    const s = existingRefund.status?.toLowerCase() ?? '';
+    const terminal = new Set(['paid', 'approved', 'completed', 'refunded', 'closed', 'resolved']);
+    if (!terminal.has(s)) {
+      return { label: 'Refund in Progress', tone: 'warning' as const };
+    }
+    return { label: s === 'paid' ? 'Refund Paid' : 'Refund Complete', tone: 'success' as const };
+  };
+
+  const getClaimBadge = () => {
+    if (!existingClaim) return null;
+    const s = existingClaim.status?.toLowerCase() ?? '';
+    const closed = new Set(['resolved_closed', 'closed', 'resolved']);
+    if (!closed.has(s)) return { label: 'Warranty In Progress', tone: 'warning' as const };
+    return { label: 'Warranty Closed', tone: 'success' as const };
+  };
+
   const Badge = ({
     label,
     tone,
@@ -266,26 +286,23 @@ export default function PurchaseDetailPage() {
     label: string;
     tone: 'success' | 'info' | 'warning' | 'danger' | 'neutral';
   }) => {
-    const map: Record<
-      'success' | 'info' | 'warning' | 'danger' | 'neutral',
-      string
-    > = {
+    const map: Record<typeof tone, string> = {
       success: 'bg-green-500/15 text-green-300 border-green-400/20',
       info: 'bg-cyan-500/15 text-cyan-300 border-cyan-400/20',
       warning: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
       danger: 'bg-red-500/15 text-red-300 border-red-400/20',
       neutral: 'bg-white/10 text-neutral-300 border-white/10',
-    };
+    } as any;
     return (
-      <span
-        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${map[tone]}`}
-      >
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${map[tone]}`}>
         {label}
       </span>
     );
   };
 
   const primaryStatus = getPrimaryStatus();
+  const refundBadge = getRefundBadge();
+  const claimBadge = getClaimBadge();
 
   return (
     <>
@@ -304,7 +321,13 @@ export default function PurchaseDetailPage() {
               <h1 className="text-xl md:text-2xl font-bold truncate">
                 Purchase Details: <span className="text-cyan-300">{purchase.store_name}</span>
               </h1>
-              <Badge label={primaryStatus.label} tone={primaryStatus.tone} />
+
+              {/* Header badges */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge label={primaryStatus.label} tone={primaryStatus.tone} />
+                {refundBadge && <Badge label={refundBadge.label} tone={refundBadge.tone} />}
+                {claimBadge && <Badge label={claimBadge.label} tone={claimBadge.tone} />}
+              </div>
             </div>
 
             <div className="w-[120px]" />
@@ -326,25 +349,40 @@ export default function PurchaseDetailPage() {
                 <span className="text-neutral-400">Order Date:</span>{' '}
                 {new Date(purchase.order_date).toLocaleDateString()}
               </p>
-              {fmtAmount && (<p><span className="text-neutral-400">Amount:</span> {fmtAmount}</p>)}
-              {purchase.payment_method && (<p><span className="text-neutral-400">Payment Method:</span> {purchase.payment_method}</p>)}
-              {purchase.email_used && (<p className="truncate"><span className="text-neutral-400">Email:</span> {purchase.email_used}</p>)}
-              {purchase.phone_number && (<p className="truncate"><span className="text-neutral-400">Phone:</span> {purchase.phone_number}</p>)}
-              {(() => {
-                const main = mainShipment;
-                return (
-                  <>
-                    {main?.tracking_number && (<p className="truncate"><span className="text-neutral-400">Tracking #:</span> {main.tracking_number}</p>)}
-                    {main?.courier && (<p className="truncate"><span className="text-neutral-400">Courier:</span> {main.courier}</p>)}
-                  </>
-                );
-              })()}
+              {fmtAmount && (
+                <p><span className="text-neutral-400">Amount:</span> {fmtAmount}</p>
+              )}
+              {purchase.payment_method && (
+                <p><span className="text-neutral-400">Payment Method:</span> {purchase.payment_method}</p>
+              )}
+              {purchase.email_used && (
+                <p className="truncate">
+                  <span className="text-neutral-400">Email:</span> {purchase.email_used}
+                </p>
+              )}
+              {purchase.phone_number && (
+                <p className="truncate">
+                  <span className="text-neutral-400">Phone:</span> {purchase.phone_number}
+                </p>
+              )}
+              {mainShipment?.tracking_number && (
+                <p className="truncate">
+                  <span className="text-neutral-400">Tracking #:</span> {mainShipment.tracking_number}
+                </p>
+              )}
+              {mainShipment?.courier && (
+                <p className="truncate">
+                  <span className="text-neutral-400">Courier:</span> {mainShipment.courier}
+                </p>
+              )}
             </div>
 
             {purchase.shipping_address && (
               <div className="mt-4">
                 <p className="text-neutral-400 mb-1">Shipping Address</p>
-                <div className="whitespace-pre-line text-neutral-200">{purchase.shipping_address}</div>
+                <div className="whitespace-pre-line text-neutral-200">
+                  {purchase.shipping_address}
+                </div>
               </div>
             )}
 
@@ -442,13 +480,12 @@ export default function PurchaseDetailPage() {
         </div>
       </main>
 
-            <RefundModal
+      <RefundModal
         isOpen={isRefundModalOpen}
         onClose={() => setIsRefundModalOpen(false)}
         onSubmit={handleSaveRefund}
         existingRefund={null}
       />
-
       <ClaimModal
         isOpen={isClaimModalOpen}
         onClose={() => setIsClaimModalOpen(false)}
