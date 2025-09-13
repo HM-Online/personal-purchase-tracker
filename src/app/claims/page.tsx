@@ -81,16 +81,30 @@ export default function ClaimsPage() {
       if (purchaseInfo) {
         const statusText = newStatus.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
         const message = `
-        🔧 <b>Claim Status Updated!</b>
-        --------------------------------------
-        <b>Store:</b> ${purchaseInfo.store_name}
-        <b>Order ID:</b> ${purchaseInfo.order_id}
-        <b>New Status:</b> ${statusText}
-        `;
+🔧 <b>Claim Status Updated!</b>
+--------------------------------------
+<b>Store:</b> ${purchaseInfo.store_name}
+<b>Order ID:</b> ${purchaseInfo.order_id}
+<b>New Status:</b> ${statusText}
+`;
         sendNotification(message);
       }
       fetchClaims();
     }
+  };
+
+  // NEW: delete a claim (show this on Initiated + Denied)
+  const handleDeleteClaim = async (claim: ClaimWithPurchase) => {
+    const ok = window.confirm('Delete this claim? This cannot be undone.');
+    if (!ok) return;
+
+    const { error } = await supabase.from('claims').delete().eq('id', claim.id);
+    if (error) {
+      alert('Error deleting claim: ' + error.message);
+      return;
+    }
+    alert('Claim deleted.');
+    fetchClaims();
   };
 
   if (loading) {
@@ -105,9 +119,11 @@ export default function ClaimsPage() {
   const ClaimCard = ({
     claim,
     children,
+    showDelete = false,
   }: {
     claim: ClaimWithPurchase;
     children?: React.ReactNode;
+    showDelete?: boolean;
   }) => (
     <div className="bg-white/5 border border-white/10 rounded-xl shadow-md p-4 backdrop-blur-xl hover:shadow-[0_0_12px] hover:shadow-cyan-500/15 transition">
       <div>
@@ -131,15 +147,26 @@ export default function ClaimsPage() {
         >
           Edit
         </button>
+
+        {showDelete && (
+          <button
+            onClick={() => handleDeleteClaim(claim)}
+            className="text-xs border border-red-500/30 text-red-300 hover:bg-red-500/10 font-semibold py-1 px-2 rounded transition"
+          >
+            Delete
+          </button>
+        )}
+
         <div className="flex-1">{children}</div>
       </div>
     </div>
   );
 
-  // Filter columns
+  // Columns
   const initiatedClaims = claims.filter((c) => c.status === 'initiated');
   const itemSentClaims = claims.filter((c) => c.status === 'item_sent');
   const resolvedClaims = claims.filter((c) => c.status === 'resolved_closed');
+  const deniedClaims = claims.filter((c) => c.status === 'denied'); // NEW
 
   return (
     <>
@@ -156,7 +183,7 @@ export default function ClaimsPage() {
         </div>
 
         {/* Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
           {/* Initiated */}
           <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
             <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
@@ -167,13 +194,21 @@ export default function ClaimsPage() {
             </h2>
             <div className="space-y-4">
               {initiatedClaims.map((claim) => (
-                <ClaimCard key={claim.id} claim={claim}>
-                  <button
-                    onClick={() => updateClaimStatus(claim, 'item_sent')}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-blue-500/60"
-                  >
-                    Mark as Item Sent →
-                  </button>
+                <ClaimCard key={claim.id} claim={claim} showDelete>
+                  <div className="flex gap-2 w-full">
+                    <button
+                      onClick={() => updateClaimStatus(claim, 'denied')}
+                      className="w-1/3 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/60"
+                    >
+                      Deny
+                    </button>
+                    <button
+                      onClick={() => updateClaimStatus(claim, 'item_sent')}
+                      className="w-2/3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-blue-500/60"
+                    >
+                      Mark as Item Sent →
+                    </button>
+                  </div>
                 </ClaimCard>
               ))}
             </div>
@@ -193,13 +228,19 @@ export default function ClaimsPage() {
                   <div className="flex gap-2 w-full">
                     <button
                       onClick={() => updateClaimStatus(claim, 'initiated')}
-                      className="w-1/2 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                      className="w-1/3 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
                     >
                       ← Undo
                     </button>
                     <button
+                      onClick={() => updateClaimStatus(claim, 'denied')}
+                      className="w-1/3 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/60"
+                    >
+                      Deny
+                    </button>
+                    <button
                       onClick={() => updateClaimStatus(claim, 'resolved_closed')}
-                      className="w-1/2 bg-green-600 hover:bg-green-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-green-500/60"
+                      className="w-1/3 bg-green-600 hover:bg-green-500 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-green-500/60"
                     >
                       Mark as Resolved →
                     </button>
@@ -226,6 +267,36 @@ export default function ClaimsPage() {
                   >
                     ← Undo
                   </button>
+                </ClaimCard>
+              ))}
+            </div>
+          </section>
+
+          {/* Denied (NEW) */}
+          <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
+            <h2 className="font-semibold text-lg mb-4 flex items-center justify-between">
+              <span className="text-red-400">Denied</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-black/30 border border-white/10">
+                {deniedClaims.length}
+              </span>
+            </h2>
+            <div className="space-y-4">
+              {deniedClaims.map((claim) => (
+                <ClaimCard key={claim.id} claim={claim} showDelete>
+                  <div className="flex gap-2 w-full">
+                    <button
+                      onClick={() => updateClaimStatus(claim, 'initiated')}
+                      className="w-1/2 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
+                    >
+                      ← Re-open
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClaim(claim)}
+                      className="w-1/2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1.5 px-2 rounded transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/60"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </ClaimCard>
               ))}
             </div>

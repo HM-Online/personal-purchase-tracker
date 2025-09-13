@@ -1,3 +1,4 @@
+// src/components/ShipmentTimeline.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,7 +10,11 @@ import ConfirmDialog from './ConfirmDialog';
 
 export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] }) {
   if (!shipments || shipments.length === 0) {
-    return <div className="text-neutral-400">No shipment information available for this purchase.</div>;
+    return (
+      <div className="text-neutral-400">
+        No shipment information available for this purchase.
+      </div>
+    );
   }
 
   const shipment = shipments[0];
@@ -22,7 +27,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
   const formatStatus = (status: string) =>
     status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
-  // Actions
+  // -------------------- Actions --------------------
   const doDelete = async () => {
     if (!shipment) return;
     const id = (shipment as any)?.id;
@@ -44,21 +49,55 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
     }
   };
 
+  // Called when EditTrackingModal submits
   const handleSaveFromModal = async (data: { tracking_number: string; courier: string }) => {
     const id = (shipment as any)?.id;
     if (!id) {
       toast.error('Cannot update: missing shipment id.');
       return;
     }
+
+    const nextTracking = data.tracking_number.trim();
+    const nextCourier = data.courier.trim();
+
     try {
+      // 1) Update our DB
       const { error } = await supabase
         .from('shipments')
-        .update({
-          tracking_number: data.tracking_number,
-          courier: data.courier,
-        })
+        .update({ tracking_number: nextTracking, courier: nextCourier })
         .eq('id', id);
+
       if (error) throw error;
+
+      // 2) Tell Ship24 to (re)track this number (same endpoint used on create)
+      try {
+        const res = await fetch('/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tracking_number: nextTracking,
+            courier: nextCourier,
+          }),
+        });
+        // Non-200 shouldn't block the UI; show a soft warning.
+        if (!res.ok) {
+          // You can inspect res.status/res.text() if you want deeper messages.
+          toast((t) => (
+            <span>
+              Tracking updated locally. Ship24 sync may have failed.
+              <button
+                className="ml-2 underline"
+                onClick={() => toast.dismiss(t.id)}
+              >
+                Dismiss
+              </button>
+            </span>
+          ), { icon: '⚠️' });
+        }
+      } catch {
+        // Network or route error – still consider local update a success.
+      }
+
       toast.success('Tracking updated');
       setIsEditOpen(false);
       window.location.reload();
@@ -67,7 +106,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
     }
   };
 
-  // Small chip components
+  // -------------------- UI bits --------------------
   const Chip = ({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) => (
     <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-neutral-200">
       {icon ? <span className="text-cyan-300">{icon}</span> : null}
