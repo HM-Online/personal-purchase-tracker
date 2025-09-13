@@ -1031,6 +1031,9 @@ video {
 .text-center {
   text-align: center;
 }
+.text-right {
+  text-align: right;
+}
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
@@ -1282,6 +1285,14 @@ body {
   background-color: #1A202C;
 }
 
+.placeholder\:text-text-muted\/70::-moz-placeholder {
+  color: rgb(160 174 192 / 0.7);
+}
+
+.placeholder\:text-text-muted\/70::placeholder {
+  color: rgb(160 174 192 / 0.7);
+}
+
 .hover\:bg-blue-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
@@ -1433,9 +1444,19 @@ body {
   border-color: rgb(34 211 238 / var(--tw-border-opacity, 1));
 }
 
+.focus\:border-accent-primary:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(56 178 172 / var(--tw-border-opacity, 1));
+}
+
 .focus\:ring-cyan-400:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(34 211 238 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-accent-primary:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(56 178 172 / var(--tw-ring-opacity, 1));
 }
 
 .disabled\:opacity-60:disabled {
