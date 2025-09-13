@@ -1,10 +1,11 @@
-// src/components/ShipmentTimeline.tsx
 'use client';
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import type { Shipment, Checkpoint } from '@/lib/types';
 import EditTrackingModal from './EditTrackingModal';
+import { toast } from 'react-hot-toast';
+import ConfirmDialog from './ConfirmDialog';
 
 export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] }) {
   if (!shipments || shipments.length === 0) {
@@ -16,37 +17,37 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
   // UI state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const formatStatus = (status: string) =>
     status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   // Actions
-  const handleDelete = async () => {
+  const doDelete = async () => {
     if (!shipment) return;
     const id = (shipment as any)?.id;
     if (!id) {
-      alert('Cannot delete: missing shipment id.');
+      toast.error('Cannot delete: missing shipment id.');
       return;
     }
-    const ok = window.confirm('Delete this tracking record? This action cannot be undone.');
-    if (!ok) return;
-
     try {
       setDeleting(true);
       const { error } = await supabase.from('shipments').delete().eq('id', id);
       if (error) throw error;
+      toast.success('Tracking deleted');
       window.location.reload();
     } catch (err: any) {
-      alert(`Failed to delete tracking: ${err?.message || err}`);
+      toast.error(err?.message || 'Failed to delete tracking');
     } finally {
       setDeleting(false);
+      setConfirmOpen(false);
     }
   };
 
   const handleSaveFromModal = async (data: { tracking_number: string; courier: string }) => {
     const id = (shipment as any)?.id;
     if (!id) {
-      alert('Cannot update: missing shipment id.');
+      toast.error('Cannot update: missing shipment id.');
       return;
     }
     try {
@@ -58,10 +59,11 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
         })
         .eq('id', id);
       if (error) throw error;
+      toast.success('Tracking updated');
       setIsEditOpen(false);
       window.location.reload();
     } catch (err: any) {
-      alert(`Failed to update tracking: ${err?.message || err}`);
+      toast.error(err?.message || 'Failed to update tracking');
     }
   };
 
@@ -97,7 +99,7 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
             Edit Tracking
           </button>
           <button
-            onClick={handleDelete}
+            onClick={() => setConfirmOpen(true)}
             disabled={deleting}
             className="inline-flex items-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 transition-shadow hover:shadow-[0_0_8px] hover:shadow-red-500/70"
           >
@@ -142,13 +144,23 @@ export default function ShipmentTimeline({ shipments }: { shipments: Shipment[] 
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <EditTrackingModal
         isOpen={isEditOpen}
         initialTrackingNumber={shipment?.tracking_number || ''}
         initialCourier={shipment?.courier || ''}
         onClose={() => setIsEditOpen(false)}
         onSubmit={handleSaveFromModal}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete tracking?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={doDelete}
+        onCancel={() => setConfirmOpen(false)}
+        processing={deleting}
       />
     </div>
   );

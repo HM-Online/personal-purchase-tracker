@@ -8,6 +8,7 @@ import Link from 'next/link';
 import ShipmentTimeline from '@/components/ShipmentTimeline';
 import RefundModal, { RefundFormData } from '@/components/RefundModal';
 import ClaimModal, { ClaimFormData } from '@/components/ClaimModal';
+import { toast } from 'react-hot-toast';
 
 async function sendNotification(message: string) {
   await fetch('/api/notify', {
@@ -17,7 +18,7 @@ async function sendNotification(message: string) {
   });
 }
 
-/** Add Tracking (same logic, glass UI only) */
+/** Add Tracking (same logic, with toasts) */
 const AddTrackingForm = ({
   purchaseId,
   onSave,
@@ -32,7 +33,7 @@ const AddTrackingForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber || !courier) {
-      alert('Please provide both a tracking number and a courier.');
+      toast.error('Please provide both a tracking number and a courier.');
       return;
     }
     setIsSaving(true);
@@ -44,7 +45,7 @@ const AddTrackingForm = ({
     });
 
     if (insertError) {
-      alert('Error saving tracking info: ' + insertError.message);
+      toast.error(insertError.message);
       setIsSaving(false);
       return;
     }
@@ -56,12 +57,13 @@ const AddTrackingForm = ({
         body: JSON.stringify({ tracking_number: trackingNumber, courier }),
       });
       if (!response.ok) throw new Error('Ship24 API call failed');
-    } catch (error) {
+    } catch (error: any) {
+      // Not fatal for UI; tracking is stored locally anyway
       console.error('Failed to initiate tracking with Ship24', error);
     }
 
     setIsSaving(false);
-    alert('Tracking information saved and activated!');
+    toast.success('Tracking information saved and activated!');
     onSave();
   };
 
@@ -155,11 +157,12 @@ export default function PurchaseDetailPage() {
       .update({ status: newStatus })
       .eq('id', shipmentId);
     if (error) {
-      alert('Error updating status: ' + error.message);
+      { toast.error(error.message); }
     } else {
       const statusText = newStatus.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
       const message = `✍️ <b>Manual Status Update!</b>\n--------------------------------------\n<b>Store:</b> ${purchase?.store_name}\n<b>Order ID:</b> ${purchase?.order_id}\n<b>New Status:</b> ${statusText}`;
       await sendNotification(message);
+      toast.success('Shipment status updated');
       fetchPurchaseDetails();
     }
   };
@@ -176,11 +179,11 @@ export default function PurchaseDetailPage() {
         refund_start_date: formData.refund_start_date || new Date(),
       });
     if (error) {
-      alert('Error starting refund: ' + error.message);
+      toast.error(error.message);
     } else {
       const message = `⚠️ <b>Refund Requested!</b>\n--------------------------------------\n<b>Store:</b> ${purchase.store_name}\n<b>Order ID:</b> ${purchase.order_id}\n<b>Amount:</b> ${formData.amount || 'N/A'}`;
       await sendNotification(message);
-      alert('Claim process started successfully!');
+      toast.success('Refund process started');
       setIsRefundModalOpen(false);
       fetchPurchaseDetails();
     }
@@ -194,11 +197,11 @@ export default function PurchaseDetailPage() {
       .from('claims')
       .insert({ purchase_id: purchase.id, status: 'initiated', ...formData });
     if (error) {
-      alert('Error starting claim: ' + error.message);
+      toast.error(error.message);
     } else {
       const message = `🔧 <b>Warranty Claim Initiated!</b>\n--------------------------------------\n<b>Store:</b> ${purchase.store_name}\n<b>Order ID:</b> ${purchase.order_id}\n<b>Reason:</b> ${formData.reason}`;
       await sendNotification(message);
-      alert('Claim process started successfully!');
+      toast.success('Claim process started');
       setIsClaimModalOpen(false);
       fetchPurchaseDetails();
     }
@@ -256,16 +259,27 @@ export default function PurchaseDetailPage() {
     return { label: 'No Shipment', tone: 'neutral' as const };
   };
 
-  const Badge = ({ label, tone }: { label: string; tone: 'success'|'info'|'warning'|'danger'|'neutral' }) => {
-    const map: Record<typeof tone, string> = {
+  const Badge = ({
+    label,
+    tone,
+  }: {
+    label: string;
+    tone: 'success' | 'info' | 'warning' | 'danger' | 'neutral';
+  }) => {
+    const map: Record<
+      'success' | 'info' | 'warning' | 'danger' | 'neutral',
+      string
+    > = {
       success: 'bg-green-500/15 text-green-300 border-green-400/20',
       info: 'bg-cyan-500/15 text-cyan-300 border-cyan-400/20',
       warning: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
       danger: 'bg-red-500/15 text-red-300 border-red-400/20',
       neutral: 'bg-white/10 text-neutral-300 border-white/10',
-    } as any;
+    };
     return (
-      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${map[tone]}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${map[tone]}`}
+      >
         {label}
       </span>
     );
@@ -316,8 +330,15 @@ export default function PurchaseDetailPage() {
               {purchase.payment_method && (<p><span className="text-neutral-400">Payment Method:</span> {purchase.payment_method}</p>)}
               {purchase.email_used && (<p className="truncate"><span className="text-neutral-400">Email:</span> {purchase.email_used}</p>)}
               {purchase.phone_number && (<p className="truncate"><span className="text-neutral-400">Phone:</span> {purchase.phone_number}</p>)}
-              {mainShipment?.tracking_number && (<p className="truncate"><span className="text-neutral-400">Tracking #:</span> {mainShipment.tracking_number}</p>)}
-              {mainShipment?.courier && (<p className="truncate"><span className="text-neutral-400">Courier:</span> {mainShipment.courier}</p>)}
+              {(() => {
+                const main = mainShipment;
+                return (
+                  <>
+                    {main?.tracking_number && (<p className="truncate"><span className="text-neutral-400">Tracking #:</span> {main.tracking_number}</p>)}
+                    {main?.courier && (<p className="truncate"><span className="text-neutral-400">Courier:</span> {main.courier}</p>)}
+                  </>
+                );
+              })()}
             </div>
 
             {purchase.shipping_address && (
@@ -421,12 +442,13 @@ export default function PurchaseDetailPage() {
         </div>
       </main>
 
-      <RefundModal
+            <RefundModal
         isOpen={isRefundModalOpen}
         onClose={() => setIsRefundModalOpen(false)}
         onSubmit={handleSaveRefund}
         existingRefund={null}
       />
+
       <ClaimModal
         isOpen={isClaimModalOpen}
         onClose={() => setIsClaimModalOpen(false)}
