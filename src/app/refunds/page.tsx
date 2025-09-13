@@ -117,6 +117,22 @@ ${statusEmoji} <b>Refund ${statusText}!</b>
     }
   };
 
+  // NEW: delete a refund row (typically for Requested / Denied)
+  const handleDeleteRefund = async (refund: RefundWithPurchaseDetails) => {
+    const ok = window.confirm(
+      'Delete this refund request? This cannot be undone.'
+    );
+    if (!ok) return;
+
+    const { error } = await supabase.from('refunds').delete().eq('id', refund.id);
+    if (error) {
+      alert('Error deleting refund: ' + error.message);
+      return;
+    }
+    alert('Refund deleted.');
+    fetchRefunds();
+  };
+
   const requestedRefunds = refunds.filter((r) => r.status === 'requested');
   const approvedRefunds = refunds.filter((r) => r.status === 'approved');
   const paidRefunds = refunds.filter((r) => r.status === 'paid');
@@ -134,9 +150,11 @@ ${statusEmoji} <b>Refund ${statusText}!</b>
   const RefundCard = ({
     refund,
     children,
+    showDelete = false,
   }: {
     refund: RefundWithPurchaseDetails;
     children?: React.ReactNode;
+    showDelete?: boolean;
   }) => (
     <div className="bg-white/5 border border-white/10 rounded-xl shadow-md p-4 backdrop-blur-xl hover:shadow-[0_0_12px] hover:shadow-cyan-500/15 transition">
       <div>
@@ -170,6 +188,17 @@ ${statusEmoji} <b>Refund ${statusText}!</b>
         >
           Edit
         </button>
+
+        {/* Optional delete (only shown where we pass showDelete=true) */}
+        {showDelete && (
+          <button
+            onClick={() => handleDeleteRefund(refund)}
+            className="text-xs border border-red-500/30 text-red-300 hover:bg-red-500/10 font-semibold py-1 px-2 rounded transition"
+          >
+            Delete
+          </button>
+        )}
+
         <div className="flex-1">{children}</div>
       </div>
     </div>
@@ -201,7 +230,7 @@ ${statusEmoji} <b>Refund ${statusText}!</b>
             </h2>
             <div className="space-y-4">
               {requestedRefunds.map((refund) => (
-                <RefundCard key={refund.id} refund={refund}>
+                <RefundCard key={refund.id} refund={refund} showDelete>
                   <div className="flex gap-2 w-full">
                     <button
                       onClick={() => updateRefundStatus(refund, 'denied')}
@@ -283,7 +312,7 @@ ${statusEmoji} <b>Refund ${statusText}!</b>
             </h2>
             <div className="space-y-4">
               {deniedRefunds.map((refund) => (
-                <RefundCard key={refund.id} refund={refund}>
+                <RefundCard key={refund.id} refund={refund} showDelete>
                   <button
                     onClick={() => updateRefundStatus(refund, 'requested')}
                     className="w-full border border-white/10 hover:bg-white/10 text-white text-xs font-semibold py-1.5 px-2 rounded transition"
