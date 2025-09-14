@@ -1,1 +1,54 @@
-node_modules
+# --- Dependencies ---
+node_modules/
+.pnp.*
+.pnp.cjs
+.pnp.loader.mjs
+
+# --- Build & Output ---
+.next/
+out/
+dist/
+build/
+.cache/
+*.tsbuildinfo
+
+# --- Env & Secrets ---
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+# Keep an example for collaborators:
+!.env.example
+
+# --- Logs & Debug ---
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Testing & Coverage ---
+coverage/
+.playwright/
+test-results/
+
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+# (Optionally keep curated workspace settings/extensions)
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- Framework / Platform ---
+.vercel/
+.next/
+firebase-debug.log
+
+# --- Misc uploads (if you ever mirror local storage) ---
+storage/
